@@ -1,0 +1,65 @@
+(kicad_sch (version 20230121) (generator eeschema)
+
+  (uuid 52643837-73aa-4540-931b-80c687ffdc6b)
+
+  (paper "A4")
+
+  (lib_symbols
+  )
+
+
+  (sheet (at 169.545 24.13) (size 74.93 33.02) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 0aa63472-f059-4ab0-b3c3-76637e5152c3)
+    (property "Sheetname" "Connectors" (at 169.545 23.4184 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "connectors.kicad_sch" (at 169.545 57.7346 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "The Typeuwu"
+        (path "/52643837-73aa-4540-931b-80c687ffdc6b" (page "4"))
+      )
+    )
+  )
+
+  (sheet (at 24.765 23.495) (size 52.07 32.385) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 4057bb27-1b6b-4419-8da0-2df938d15db5)
+    (property "Sheetname" "Keys" (at 24.765 22.7834 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "keys.kicad_sch" (at 24.765 56.4646 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "The Typeuwu"
+        (path "/52643837-73aa-4540-931b-80c687ffdc6b" (page "2"))
+      )
+    )
+  )
+
+  (sheet (at 88.9 24.765) (size 66.04 31.115) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 91314e46-7e27-4bf0-955a-19a97d9de495)
+    (property "Sheetname" "Controller" (at 88.9 24.0534 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "controller.kicad_sch" (at 88.9 56.4646 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "The Typeuwu"
+        (path "/52643837-73aa-4540-931b-80c687ffdc6b" (page "3"))
+      )
+    )
+  )
+
+  (sheet_instances
+    (path "/" (page "1"))
+  )
+)
