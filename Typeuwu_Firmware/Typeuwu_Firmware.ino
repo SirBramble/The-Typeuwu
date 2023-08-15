@@ -1,9 +1,22 @@
+#include "filesystem.h"
+
+#define SERIAL_DEBUG
+
+module keyboard("keyboard");
+
+
 void setup() {
-  // put your setup code here, to run once:
+  Serial.begin(115200);
+  filesystemSetup();
+  filesystemCreateConfig();
+  Serial.println("uwu Setup");
+  while( !TinyUSBDevice.mounted() ) Serial.println("crashing");
 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  filesystemLoop();
+  keyboard.updateKeymapsFromFile();
+  Serial.println("uwu");
+  delay(1000);
 }

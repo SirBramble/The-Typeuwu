@@ -38,6 +38,8 @@ int32_t msc_read_cb (uint32_t lba, void* buffer, uint32_t bufsize)
 // return number of written bytes (must be multiple of block size)
 int32_t msc_write_cb (uint32_t lba, uint8_t* buffer, uint32_t bufsize)
 {
+  digitalWrite(LED_BUILTIN, HIGH);
+
   // Note: SPIFLash Block API: readBlocks/writeBlocks/syncBlocks
   // already include 4K sector caching internally. We don't need to cache it, yahhhh!!
   return flash.writeBlocks(lba, buffer, bufsize/512) ? bufsize : -1;
@@ -62,6 +64,8 @@ void msc_flush_cb (void)
 // the setup function runs once when you press reset or power the board
 void filesystemSetup()
 {
+  pinMode(LED_BUILTIN, OUTPUT);
+
   flash.begin();
 
   // Set disk vendor id, product id and revision with string up to 8, 16, 4 characters respectively
@@ -143,6 +147,7 @@ void filesystemLoop()
     root.close();
 
     Serial.println();
+    delay(1000); // refresh every 1 second
   }
 }
 
@@ -150,7 +155,7 @@ bool check_fs_changed(){
   return fs_changed;
 }
 
-void filesystenClear(){
+void filesystemClear(){
   if (!flash.eraseChip()) {
     Serial.println("Failed to erase chip!");
   }
@@ -173,6 +178,23 @@ void filesystenClear(){
   }
 }
 
+void filesystemCreateConfig(){
+  String filename_to_open = "Layout.txt";
+  if(!fatfs.exists(filename_to_open)){
+    Serial.println("Layout.txt does not exist");
+    Serial.println("Trying to create Layout.txt...");
+    File32 writeFile = fatfs.open("Layout.txt", FILE_WRITE);
+    if (!writeFile) {
+      Serial.println("Error, failed to open Layout.txt for writing!");
+      while(1) yield();
+    }
+    Serial.println("Created Layout.txt succesfully");
+    writeFile.println("This is a test line, please ignore...");             //perhaps implement default config file...
+    writeFile.close();
+  }
+  return;
+}
+
 
 //-----------------------key------------------------------
 key::key(void){
@@ -192,6 +214,11 @@ void key::clear(){
   return;
 }
 
+void key::clearToZero(){
+  keycodes.resize(0);
+  return;
+}
+
 keysycode key::getKeysycode(uint16_t position){
   return keycodes.at(position);
 }
@@ -199,7 +226,7 @@ keysycode key::getKeysycode(uint16_t position){
 //------------------------keySet--------------------------
 
 keySet::keySet(void){
-  keys.at(0) = nullptr;
+  keys.at(0) = new key();           //may cause problems
 }
 
 void keySet::setSize(uint16_t ammountKeys){
@@ -208,24 +235,35 @@ void keySet::setSize(uint16_t ammountKeys){
     keys.pop_back();
   }
   
-  if(keys.size == ammountKeys) return;
+  if(keys.size() == ammountKeys) return;
 
-  keys.resize(ammountKeys, nullptr);
-  for(uint16_t i = 0; i < ammountKeys; i++){
-    if(keys.at(i) == nullptr){
-      keys.at(i) = new key();       //may cause problems, keep in mind
-    }
+  //keys.resize(ammountKeys, nullptr);
+  for(uint16_t i = 0; i < ammountKeys-keys.size(); i++){
+      keys.push_back(new key);       //may cause problems, keep in mind
   }
   return;
 }
 
 key * keySet::getKeyPointer(uint16_t position){
-  return keys.at(position);
+  if(position < keys.size()) return keys.at(position);
+  else return nullptr;
 }
 
-//-----------------------layerSet-------------------------
+void keySet::clear(){
+  while(!keys.empty()){
+    delete keys.at(keys.size() - 1);
+    keys.pop_back();
+  }
+  keys.push_back(new key);
+}
 
-void layerSet::setSize(uint16_t ammountLayers, uint16_t ammountKeys){
+//-----------------------module-------------------------
+
+module::module(String moduleName){
+  this->moduleName = moduleName;
+}
+
+void module::setSize(uint16_t ammountLayers, uint16_t ammountKeys){
   layers.resize(ammountLayers);
   for(uint16_t i = 0; i < ammountLayers; i++){
     layers.at(i).setSize(ammountKeys);
@@ -233,9 +271,187 @@ void layerSet::setSize(uint16_t ammountLayers, uint16_t ammountKeys){
   return;
 }
 
+void module::clearAll(){
+  for(uint16_t i = 0; i < layers.size(); i++){
+    if(!layers.empty()){
+      layers.at(i).clear();
+      layers.pop_back();
+    }
+  }
+}
+
+key * module::getKeyPointer(uint16_t layer, uint16_t position){
+  if(layer < layers.size()) return layers.at(layer).getKeyPointer(position);
+  else return nullptr;
+}
+
+void module::updateKeymapsFromFile(){
+  Serial.println("update Keymaps from file");
+  File32 Layout = fatfs.open(CONFIG_FILENAME, FILE_READ);
+  if(!Layout){
+    Layout.close();
+    filesystemCreateConfig();
+    Layout = fatfs.open(CONFIG_FILENAME, FILE_READ);
+    if(!Layout) while(1){
+      Serial.println("failed to open Config!");
+      delay(500);
+    }
+  }
+
+  String fileAll;
+  while (Layout.available()) {
+    fileAll.concat((char)Layout.read());
+  }
+
+  Layout.close();
+
+  MatchState fileAllSearch;
+  int fileAllLength = fileAll.length() + 1;      // Safety Margin because of '\0' and all that
+  char *buf = new char[fileAllLength];           // may be a waste of space, but we got 16MB... I mean come on...
+  for(uint16_t i = 0; i < fileAll.length()-1; i++) buf[i] = '\0';   //clear buffer
+  
+  char *fileAllBuffer = new char[fileAllLength];
+  fileAll.toCharArray(fileAllBuffer, fileAllLength);
+
+  fileAllSearch.Target(fileAllBuffer);
+
+  // search it
+  String targetModule = "begin%(" + this->moduleName + "%)(.*)end%(" + this->moduleName + "%)";     //perhaps change (.*) to .* or something
+  char result = fileAllSearch.Match (targetModule.c_str(), 0);
 
 
+  String moduleString;
+  // check results
 
+  switch (result)
+  {
+    case REGEXP_MATCHED:
 
+      Serial.println ("-----");
+      Serial.print ("Captured: ");
+      
+      moduleString += fileAllSearch.GetCapture(buf, 0);
+      Serial.println (moduleString.c_str());
+
+      // matching offsets in ms.capture
+
+      Serial.print ("Captures: ");
+      Serial.println (fileAllSearch.level);
+      break;
+
+    case REGEXP_NOMATCH:
+      Serial.println ("No match.");
+      break;
+
+    default:
+      Serial.print ("Regexp error: ");
+      Serial.println (result, DEC);
+      break;
+
+  }  // end of switch
+
+  delete[] fileAllBuffer;
+  delete[] buf;
+
+  // return;          //worked till here!
+  
+  String moduleStringSecond = moduleString.substring(0);
+
+  uint16_t layerMax = 1;
+  uint16_t positionMax = 1;
+
+  uint16_t layerCurrent;
+  uint16_t positionCurrent;
+  
+  // First run, to get max vals
+  while(moduleString.length() > 1){       //perhaps make > 1
+    Serial.println("running first while");
+    String line = moduleString.substring(0, moduleString.indexOf("\n"));
+    moduleString.remove(0, moduleString.indexOf("\n") + 1);     //perhaps add +1 to end index...
+
+    int lineLength = line.length() + 1;     // because of '\0' and all that
+    char *lineBuffer = new char[lineLength];
+    buf = new char[lineLength];
+    line.toCharArray(lineBuffer, lineLength);
+
+    MatchState lineSearch;
+    lineSearch.Target(lineBuffer);
+    if(lineSearch.Match("Layer (%d+)", 0) == REGEXP_MATCHED){
+      layerCurrent = atoi(lineSearch.GetCapture(buf, 0));
+      Serial.print("Layer current: ");Serial.println(layerCurrent);
+      if(layerCurrent > layerMax) layerMax = layerCurrent;
+    }
+    if(lineSearch.Match("Button (%d+)", 0) == REGEXP_MATCHED){
+      positionCurrent = atoi(lineSearch.GetCapture(buf, 0));
+      Serial.print("Position Current: ");Serial.println(positionCurrent);
+      if(positionCurrent > positionMax) positionMax = positionCurrent;
+    }
+    delete[] buf;
+    if(moduleString.indexOf("\n") == -1) break;
+  }
+  Serial.print("layerMax: ");Serial.println(layerMax);
+  Serial.print("positionMax: "); Serial.println(positionMax);
+  return;     //worked till here
+  this->setSize(layerMax, positionMax);     //CRASHED HERE!!!!!!
+  //return;
+  //Second Run to get Strings
+  while(moduleStringSecond.length() > 0){       //perhaps make > 1
+    String stringToInterpret;
+    String line = moduleStringSecond.substring(0, moduleStringSecond.indexOf("\n"));
+    moduleStringSecond.remove(0, moduleStringSecond.indexOf("\n"));     //perhaps add +1 to end index...
+
+    int lineLength = line.length() + 1;     // because of '\0' and all that
+    char *lineBuffer = new char[lineLength];
+    buf = new char[lineLength];
+    line.toCharArray(lineBuffer, lineLength);
+
+    MatchState lineSearch;
+    lineSearch.Target(lineBuffer);
+    if(lineSearch.Match("Layer (%d+)", 0) == REGEXP_MATCHED){
+      layerCurrent = atoi(lineSearch.GetCapture(buf, 0));
+    }
+    if(lineSearch.Match("Button (%d+): (.*)", 0) == REGEXP_MATCHED){
+      positionCurrent = atoi(lineSearch.GetCapture(buf, 0));
+      stringToInterpret += lineSearch.GetCapture(buf, 1);
+      interpret(this->getKeyPointer(layerCurrent, positionCurrent), stringToInterpret);
+      stringToInterpret.remove(0);
+    }
+    delete[] buf;
+  }
+}
+
+//------------------------------interpreter-------------------------------------
+void interpreter::interpret(key * inputKey, String inputString){
+  while(inputString.length() > 0){
+    int inputLength = inputString.length() + 1;
+    char * inputBuffer = new char[inputLength];
+    inputString.toCharArray(inputBuffer, inputLength);
+    char * buf = new char[inputLength];
+    String keycodeBufferString;
+
+    MatchState inputSearch;
+    inputSearch.Target(inputBuffer);
+    if(inputSearch.Match("^(%a+)") == REGEXP_MATCHED){
+      keycodeBufferString += inputSearch.GetCapture(buf, 0);
+      stringToKeycodes(inputKey, keycodeBufferString);
+    }
+
+    keycodeBufferString.remove(0);
+    delete[] inputBuffer;
+    delete[] buf;
+  }
+}
+
+void interpreter::stringToKeycodes(key * inputKey, String inputString){
+  // clear keysycode vector with key.clearToZero()
+
+  inputKey->clearToZero();
+  for(uint16_t i = 0; i < inputString.length(); i++){           //may need +1
+    inputKey->appendKeysycode(ASCII_conv_table_german[inputString.charAt(i)][1], ASCII_conv_table_german[inputString.charAt(i)][0], RID_KEYBOARD, 0);
+  }
+  return;
+}
+
+// make seperate Funktion to check for immediate Send!!!! Will make Life a lot easier
 
 

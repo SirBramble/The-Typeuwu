@@ -1,10 +1,6 @@
-#ifndef FILESYSTEM
-#define FILESYSTEM
-
-#include "Regexp.h"
+#include <cstdint>
 #include <vector>
-#include <Arduino.h>
-#include "Adafruit_TinyUSB.h"
+#include <string>
 
 #define CONFIG_FILENAME "Layout.txt"
 
@@ -150,23 +146,6 @@
     {KEY_MOD_RALT   , 0x30                  }, /* 0x7E ~  !may also be 0x31! */ \
     {0              , HID_KEY_DELETE        }  /* 0x7F Delete    */ \
 
-
-
-enum
-{
-  RID_KEYBOARD = 1,
-  RID_GAMEPAD,
-  RID_CONSUMER_CONTROL, // Media, volume etc ..
-};
-
-void filesystemSetup();
-void filesystemLoop();
-void filesystemClear();
-void filesystemTest();
-void filesystemCreateConfig();
-
-bool check_fs_changed();
-
 typedef struct{
   uint8_t keycode;
   uint8_t modifier;
@@ -199,24 +178,19 @@ private:
 
 class interpreter{
 public:
-  void interpret(key * inputKey, String inputString);
-  void stringToKeycodes(key * inputKey, String inputString);
-  uint8_t const ASCII_conv_table_german[128][2] =  { HID_ASCII_TO_KEYCODE_GERMAN };
+  void interpret(key * inputKey, std::string inputString);
+  void stringToKeycodes(key * inputKey, std::string inputString);
+  uint8_t const ASCII_conv_table_german[128][2] = {HID_ASCII_TO_KEYCODE_GERMAN};
 };
 
 class module: public interpreter{
 public:
-  module(String moduleName);
+  module(std::string moduleName);
   void setSize(uint16_t ammountLayers, uint16_t ammountKeys);
   void clearAll();
   key * getKeyPointer(uint16_t layer, uint16_t position);
   void updateKeymapsFromFile();
-  String moduleName;
+  std::string moduleName;
 private:
   std::vector <keySet> layers;
 };
-
-
-
-
-#endif // FILESYSTEM
