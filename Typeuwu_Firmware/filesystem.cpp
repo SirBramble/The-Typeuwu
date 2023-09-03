@@ -3,6 +3,7 @@
 #include "SPI.h"
 #include <SdFat.h>
 #include "Adafruit_SPIFlash.h"
+#include "Adafruit_TinyUSB.h"
 
 #include "flash_config.h"
 
@@ -38,7 +39,7 @@ int32_t msc_read_cb (uint32_t lba, void* buffer, uint32_t bufsize)
 // return number of written bytes (must be multiple of block size)
 int32_t msc_write_cb (uint32_t lba, uint8_t* buffer, uint32_t bufsize)
 {
-  digitalWrite(LED_BUILTIN, HIGH);
+  //digitalWrite(LED_BUILTIN, HIGH);
 
   // Note: SPIFLash Block API: readBlocks/writeBlocks/syncBlocks
   // already include 4K sector caching internally. We don't need to cache it, yahhhh!!
@@ -57,14 +58,14 @@ void msc_flush_cb (void)
 
   fs_changed = true;
 
-  digitalWrite(LED_BUILTIN, LOW);
+  //digitalWrite(LED_BUILTIN, LOW);
 }
 
 
 // the setup function runs once when you press reset or power the board
 void filesystemSetup()
 {
-  pinMode(LED_BUILTIN, OUTPUT);
+  //pinMode(LED_BUILTIN, OUTPUT);
 
   flash.begin();
 
@@ -197,92 +198,90 @@ void filesystemCreateConfig(){
 
 
 //-----------------------key------------------------------
-key::key(void){
-  if(keycodes.empty()) keycodes.push_back({0,0,0,0});
-  else keycodes.at(0) = {0,0,0,0};
+key::key(){
+    keycodes.push_back({0,0,0,0});
 }
 
 void key::appendKeysycode(uint8_t keycode, uint8_t modifier, uint8_t reportID, uint8_t immediateSend){
-  keysycode tmp = {keycode, modifier, reportID, immediateSend};
-  keycodes.push_back(tmp);
-  return;
+    keycodes.push_back({keycode, modifier, reportID, immediateSend});
+    return;
 }
 
 void key::clear(){
-  keycodes.resize(1);
-  keycodes.at(0) = {0,0,0,0};
-  return;
+    keycodes.resize(0);
+    keycodes.push_back({0,0,0,0});
+    return;
 }
 
 void key::clearToZero(){
-  keycodes.resize(0);
-  return;
+    keycodes.resize(0);
+    return;
 }
 
 keysycode key::getKeysycode(uint16_t position){
-  return keycodes.at(position);
+    if(position < keycodes.size()) return keycodes.at(position);
+    else return {0,0,0,0};
+}
+
+uint16_t key::getKeycodesSize(){
+  return (uint16_t)keycodes.size();
+}
+
+void key::setAnalog(uint16_t value){
+    this->analogValue = value;
+    return;
+}
+
+uint16_t key::getAnalog(){
+    return this->analogValue;
 }
 
 //------------------------keySet--------------------------
 
-keySet::keySet(void){
-  keys.at(0) = new key();           //may cause problems
+keySet::keySet(){
+    keys.push_back(key());
 }
 
 void keySet::setSize(uint16_t ammountKeys){
-  while(keys.size() > ammountKeys){
-    delete keys.at(keys.size() - 1);
-    keys.pop_back();
-  }
-  
-  if(keys.size() == ammountKeys) return;
-
-  //keys.resize(ammountKeys, nullptr);
-  for(uint16_t i = 0; i < ammountKeys-keys.size(); i++){
-      keys.push_back(new key);       //may cause problems, keep in mind
-  }
-  return;
+    keys.resize(ammountKeys, key());
+    return;
 }
 
 key * keySet::getKeyPointer(uint16_t position){
-  if(position < keys.size()) return keys.at(position);
-  else return nullptr;
+    if(position < keys.size()) return &keys.at(position);
+    else return nullptr;
 }
 
 void keySet::clear(){
-  while(!keys.empty()){
-    delete keys.at(keys.size() - 1);
-    keys.pop_back();
-  }
-  keys.push_back(new key);
+    keys.resize(0);
+    keys.push_back(key());
+    return;
 }
 
 //-----------------------module-------------------------
 
 module::module(String moduleName){
-  this->moduleName = moduleName;
+    this->moduleName = moduleName;
+    layers.push_back(keySet());
 }
 
 void module::setSize(uint16_t ammountLayers, uint16_t ammountKeys){
-  layers.resize(ammountLayers);
-  for(uint16_t i = 0; i < ammountLayers; i++){
-    layers.at(i).setSize(ammountKeys);
-  }
-  return;
+    layers.resize(ammountLayers, keySet());
+    for(uint16_t i = 0; i < ammountLayers; i++){
+        layers.at(i).setSize(ammountKeys);
+    }
+    return;
 }
 
 void module::clearAll(){
-  for(uint16_t i = 0; i < layers.size(); i++){
-    if(!layers.empty()){
-      layers.at(i).clear();
-      layers.pop_back();
-    }
-  }
+    layers.resize(0);
+    layers.push_back(keySet());
+    return;
 }
 
 key * module::getKeyPointer(uint16_t layer, uint16_t position){
-  if(layer < layers.size()) return layers.at(layer).getKeyPointer(position);
-  else return nullptr;
+    if(layer < layers.size()) return layers.at(layer).getKeyPointer(position);
+    else return nullptr;
 }
 
 void module::updateKeymapsFromFile(){
@@ -367,6 +366,7 @@ void module::updateKeymapsFromFile(){
   while(moduleString.length() > 1){       //perhaps make > 1
     Serial.println("running first while");
     String line = moduleString.substring(0, moduleString.indexOf("\n"));
+    Serial.print("line: ");Serial.println(line.c_str());
     moduleString.remove(0, moduleString.indexOf("\n") + 1);     //perhaps add +1 to end index...
 
     int lineLength = line.length() + 1;     // because of '\0' and all that
@@ -391,14 +391,18 @@ void module::updateKeymapsFromFile(){
   }
   Serial.print("layerMax: ");Serial.println(layerMax);
   Serial.print("positionMax: "); Serial.println(positionMax);
-  return;     //worked till here
-  this->setSize(layerMax, positionMax);     //CRASHED HERE!!!!!!
-  //return;
+  //return;     //worked till here
+  this->setSize(layerMax + (uint16_t)1, positionMax + (uint16_t)1);     // + 1 because start counting at 1 not 0
+  //return;     //worked till here
   //Second Run to get Strings
   while(moduleStringSecond.length() > 0){       //perhaps make > 1
+  Serial.println("running second while");
     String stringToInterpret;
     String line = moduleStringSecond.substring(0, moduleStringSecond.indexOf("\n"));
-    moduleStringSecond.remove(0, moduleStringSecond.indexOf("\n"));     //perhaps add +1 to end index...
+    Serial.print("moduleStringSecond: ");Serial.println(moduleStringSecond.c_str());
+    Serial.print("line: ");Serial.println(line.c_str());
+    //return;
+    moduleStringSecond.remove(0, moduleStringSecond.indexOf("\n") + 1);     //perhaps add +1 to end index...
 
     int lineLength = line.length() + 1;     // because of '\0' and all that
     char *lineBuffer = new char[lineLength];
@@ -412,17 +416,27 @@ void module::updateKeymapsFromFile(){
     }
     if(lineSearch.Match("Button (%d+): (.*)", 0) == REGEXP_MATCHED){
       positionCurrent = atoi(lineSearch.GetCapture(buf, 0));
+      Serial.print("positionCurrent: ");Serial.println(positionCurrent);
       stringToInterpret += lineSearch.GetCapture(buf, 1);
-      interpret(this->getKeyPointer(layerCurrent, positionCurrent), stringToInterpret);
+      interpret(this->getKeyPointer(layerCurrent, positionCurrent), stringToInterpret);       //CRASHED somewere in here!!!!
       stringToInterpret.remove(0);
     }
     delete[] buf;
+    if(moduleStringSecond.indexOf("\n") == -1) break;
   }
+  return;
 }
 
 //------------------------------interpreter-------------------------------------
 void interpreter::interpret(key * inputKey, String inputString){
-  while(inputString.length() > 0){
+  if(inputKey == nullptr){
+    Serial.println("Nullus Mullus!!");
+    return;
+  }
+
+  int itterations = 0;
+
+  while(inputString.length() > 0 && itterations < MAX_WHILE_ITTERATIONS){
     int inputLength = inputString.length() + 1;
     char * inputBuffer = new char[inputLength];
     inputString.toCharArray(inputBuffer, inputLength);
@@ -431,15 +445,19 @@ void interpreter::interpret(key * inputKey, String inputString){
 
     MatchState inputSearch;
     inputSearch.Target(inputBuffer);
-    if(inputSearch.Match("^(%a+)") == REGEXP_MATCHED){
+    if(inputSearch.Match("^([%a%d_]+)") == REGEXP_MATCHED){
       keycodeBufferString += inputSearch.GetCapture(buf, 0);
       stringToKeycodes(inputKey, keycodeBufferString);
+      inputString.remove(0, keycodeBufferString.length());
     }
+    else break;
 
     keycodeBufferString.remove(0);
     delete[] inputBuffer;
     delete[] buf;
+    itterations++;
   }
+  if(inputKey->getKeycodesSize() == 1) inputKey->isSingleKey == 1;
 }
 
 void interpreter::stringToKeycodes(key * inputKey, String inputString){
@@ -447,7 +465,13 @@ void interpreter::stringToKeycodes(key * inputKey, String inputString){
 
   inputKey->clearToZero();
   for(uint16_t i = 0; i < inputString.length(); i++){           //may need +1
-    inputKey->appendKeysycode(ASCII_conv_table_german[inputString.charAt(i)][1], ASCII_conv_table_german[inputString.charAt(i)][0], RID_KEYBOARD, 0);
+    uint8_t sendimediate = 0;
+    if(inputString.charAt(i+1) != -1){
+      if(ASCII_conv_table_german[inputString.charAt(i)][0] != ASCII_conv_table_german[inputString.charAt(i + 1)][0]){
+        sendimediate = 1;
+      }
+    }
+    inputKey->appendKeysycode(ASCII_conv_table_german[inputString.charAt(i)][1], ASCII_conv_table_german[inputString.charAt(i)][0], RID_KEYBOARD, sendimediate);
   }
   return;
 }

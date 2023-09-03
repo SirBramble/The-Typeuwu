@@ -1,4 +1,4 @@
-21723151022955189
+21800077423121180
 Antennas
 7488960245
 
@@ -6320,7 +6320,7 @@ capacitor tantalum
 0
 2
 2
-Capacitors
+Capacitor_custom
 KNSCHA RVT100UF80V167RV0112
 
 
@@ -49545,154 +49545,161 @@ connector Wuerth WR-WTB vertical
 0
 10
 10
-Connectors
+Connector_custom
 4Pin Connector
 
 
 0
 4
 4
-Connectors
+Connector_custom
 5033981892 SD Card Slot
 
 
 0
 14
 10
-Connectors
+Connector_custom
 DB2EVC-2.54-4P-GN
 
 
 0
 4
 4
-Connectors
+Connector_custom
 DB127V-5.08-2P-GN-S
 
 
 0
 2
 2
-Connectors
+Connector_custom
 HC-PH-2AWT
 
 
 0
 4
 3
-Connectors
+Connector_custom
 HC-PH-4AWT
 
 
 0
 6
 5
-Connectors
+Connector_custom
 HC-TYPE-C-16P-01A
 
 
 0
 16
 13
-Connectors
+Connector_custom
 Micro USB
 
 
 0
 9
 6
-Connectors
+Connector_custom
 Micro USB 10118192-0001LF
 
 
 0
 11
 6
-Connectors
+Connector_custom
 Molex SMA SMD 50Ohm
 
 
 0
 7
 2
-Connectors
+Connector_custom
 POGO Magnetic 2 Pin 2,8mm Horizontal
 
 
 0
 2
 2
-Connectors
+Connector_custom
 POGO Magnetic 4 Pin 2,2mm Horizontal
 
 
 0
 4
 4
-Connectors
+Connector_custom
+POGO Magnetic 4 Pin Horizontal
+
+
+0
+4
+4
+Connector_custom
 PTF-77 Fuseholder
 
 
 0
 2
 2
-Connectors
+Connector_custom
 Pin Header 1.27mm 2
 
 
 0
 2
 2
-Connectors
+Connector_custom
 Pin Header 1.27mm 8
 
 
 0
 8
 8
-Connectors
+Connector_custom
 SM02B-SRSS-TB(LF)(SN)
 
 
 0
 4
 3
-Connectors
+Connector_custom
 SM03B-SRSS-TB(LF)(SN)
 
 
 0
 5
 4
-Connectors
+Connector_custom
 SM04B-SRSS-TB(LF)(SN)
 
 
 0
 6
 5
-Connectors
+Connector_custom
 SM05B-SRSS-TB(LF)(SN)
 
 
 0
 7
 6
-Connectors
+Connector_custom
 Screw Terminal sideways 5,08mm 2P
 
 
 0
 2
 2
-Connectors
+Connector_custom
 Screw Terminal sideways 5,08mm 4P
 
 
 0
 4
 4
-Connectors
+Connector_custom
 USAKRO_UK-USB
 
 
@@ -52884,42 +52891,42 @@ Vishay KBU rectifier diode bridge
 0
 4
 4
-Diodes
+Diode_custom
 19-217 GHC-YR1S2 3T Led
 
 
 0
 2
 2
-Diodes
+Diode_custom
 CD214A-B240LR
 
 
 0
 2
 2
-Diodes
+Diode_custom
 CUS10S30,H3F
 
 
 0
 2
 2
-Diodes
+Diode_custom
 DSS210 Schottky 100V
 
 
 0
 2
 2
-Diodes
+Diode_custom
 PEC2305C4E5_R1_00001
 
 
 0
 5
 5
-Diodes
+Diode_custom
 XL-A3528RGBC-BM RGB LED
 
 
@@ -53199,6 +53206,13 @@ LCD 16x2 Alphanumeric 16pin
 0
 20
 16
+Display modules
+MC096VX and SSD1306 Display module 0.96”
+
+
+0
+4
+4
 Display_7Segment
 7SEGMENT-LED__HDSM531_HDSM533_SMD
 7-Segment Display, HDSM53x, https://docs.broadcom.com/docs/AV02-0713EN
@@ -53570,6 +53584,13 @@ One digit LED 7 segment SA39-11 SC39-11 SA39-12 SC39-12
 0
 10
 10
+Encoder
+Alps EC12 with Neopixel
+
+
+0
+9
+8
 Ferrite_THT
 LairdTech_28C0236-0JW-10
 Ferrite, vertical, LairdTech 28C0236-0JW-10, https://assets.lairdtech.com/home/brandworld/files/28C0236-0JW-10.pdf, JW Miller core https://www.bourns.com/products/magnetic-products/j.w.-miller-through-hole-ferrite-beads-emi-filters
@@ -54775,6 +54796,13 @@ MMBT3904 NPN SOT-23
 3
 3
 ICs
+SN74LVC2G17DCKR
+
+
+0
+6
+6
+ICs
 SRV05-4-N
 
 
@@ -54795,6 +54823,13 @@ TPS5405DR
 0
 8
 8
+IO Expanders
+PCA9505DGGY
+
+
+0
+56
+56
 Inductor_SMD
 L_6.3x6.3_H3
 Choke, SMD, 6.3x6.3mm 3mm height
@@ -59779,28 +59814,28 @@ THT
 0
 4
 2
-Inductors
+Inductor_custom
 IHLP2020CZER100M01 2.5A 10uH
 
 
 0
 2
 2
-Inductors
+Inductor_custom
 SLF0705 2.3A 10uH SMD
 
 
 0
 2
 2
-Inductors
+Inductor_custom
 SPM4030-5R6M 5.6uH 3.4A
 
 
 0
 2
 2
-Inductors
+Inductor_custom
 TMPC0503H-5R6MG-D
 
 
@@ -64896,6 +64931,237 @@ SX1M40
 0
 4
 4
+PCM_arduino-library
+Arduino_101_Shield
+https://docs.arduino.cc/retired/boards/arduino-101-619
+
+0
+38
+38
+PCM_arduino-library
+Arduino_Due_Shield
+https://docs.arduino.cc/hardware/due
+
+0
+92
+91
+PCM_arduino-library
+Arduino_Giga_R1_WiFi_Shield
+https://docs.arduino.cc/hardware/giga-r1-wifi
+
+0
+92
+91
+PCM_arduino-library
+Arduino_Leonardo_Shield
+https://docs.arduino.cc/hardware/leonardo
+
+0
+38
+37
+PCM_arduino-library
+Arduino_M0_Pro_Shield
+https://docs.arduino.cc/retired/boards/arduino-m0-pro
+
+0
+38
+37
+PCM_arduino-library
+Arduino_MKR_1000_WiFi_Socket
+https://docs.arduino.cc/hardware/mkr-1000-wifi
+
+0
+28
+28
+PCM_arduino-library
+Arduino_MKR_FOX_1200_Socket
+https://docs.arduino.cc/hardware/mkr-fox-1200
+
+0
+28
+28
+PCM_arduino-library
+Arduino_MKR_Vidor_4000_Socket
+https://docs.arduino.cc/hardware/mkr-vidor-4000
+
+0
+28
+28
+PCM_arduino-library
+Arduino_MKR_WiFi_1010_Socket
+https://docs.arduino.cc/hardware/mkr-wifi-1010
+
+0
+28
+28
+PCM_arduino-library
+Arduino_MKR_Zero_Socket
+https://docs.arduino.cc/hardware/mkr-zero
+
+0
+28
+28
+PCM_arduino-library
+Arduino_Mega2560_R3_Shield
+https://docs.arduino.cc/hardware/mega-2560
+
+0
+92
+91
+PCM_arduino-library
+Arduino_Micro_Socket
+https://docs.arduino.cc/hardware/micro
+
+0
+34
+32
+PCM_arduino-library
+Arduino_Mini_Socket
+https://docs.arduino.cc/retired/boards/arduino-mini-05
+
+0
+35
+35
+PCM_arduino-library
+Arduino_Mini_Socket_NoSPH
+https://docs.arduino.cc/retired/boards/arduino-mini-05
+
+0
+30
+30
+PCM_arduino-library
+Arduino_Nano_33_IoT_Socket
+https://docs.arduino.cc/hardware/nano-33-iot
+
+0
+30
+30
+PCM_arduino-library
+Arduino_Nano_33_IoT_Tile
+https://docs.arduino.cc/hardware/nano-33-iot
+
+0
+30
+30
+PCM_arduino-library
+Arduino_Nano_Every_Socket
+https://docs.arduino.cc/hardware/nano-every
+
+0
+30
+30
+PCM_arduino-library
+Arduino_Nano_Every_Tile
+https://docs.arduino.cc/hardware/nano-every
+
+0
+30
+30
+PCM_arduino-library
+Arduino_Nano_Socket
+https://docs.arduino.cc/hardware/nano
+
+0
+30
+30
+PCM_arduino-library
+Arduino_Nicla_Vision_Socket
+https://docs.arduino.cc/hardware/nicla-vision
+
+0
+19
+18
+PCM_arduino-library
+Arduino_Nicla_Vision_Tile
+https://docs.arduino.cc/hardware/nicla-vision
+
+0
+19
+18
+PCM_arduino-library
+Arduino_Nicla_Voice_Socket
+https://docs.arduino.cc/hardware/nicla-voice
+
+0
+19
+17
+PCM_arduino-library
+Arduino_Nicla_Voice_Tile
+https://docs.arduino.cc/hardware/nicla-voice
+
+0
+19
+17
+PCM_arduino-library
+Arduino_Pro_Mini_Socket
+https://docs.arduino.cc/retired/boards/arduino-pro-mini
+
+0
+34
+34
+PCM_arduino-library
+Arduino_Pro_Mini_Socket_NoSPH
+https://docs.arduino.cc/retired/boards/arduino-pro-mini
+
+0
+28
+28
+PCM_arduino-library
+Arduino_Uno_R2_Shield
+https://startingelectronics.org/articles/arduino/uno-r3-r2-differences/
+
+0
+34
+34
+PCM_arduino-library
+Arduino_Uno_R3_Shield
+https://docs.arduino.cc/hardware/uno-rev3
+
+0
+38
+37
+PCM_arduino-library
+Arduino_Uno_R4_Minima_Shield
+https://docs.arduino.cc/hardware/uno-r4-minima
+
+0
+38
+38
+PCM_arduino-library
+Arduino_Uno_R4_WiFi_Shield
+https://docs.arduino.cc/hardware/uno-r4-wifi
+
+0
+47
+46
+PCM_arduino-library
+Arduino_Zero_Shield
+https://docs.arduino.cc/hardware/zero
+
+0
+38
+38
+PCM_arduino-library
+Clone_Mega2560_Pro_Socket
+https://docs.arduino.cc/hardware/mega-2560
+
+0
+86
+86
+PCM_arduino-library
+Clone_Pro_Mini_Socket
+https://www.addicore.com/Pro-Mini-p/ad249.htm
+
+0
+35
+35
+PCM_arduino-library
+Clone_Pro_Mini_Socket_NoSPH
+https://www.addicore.com/Pro-Mini-p/ad249.htm
+
+0
+29
+29
 Package_BGA
 Analog_BGA-28_4.0x6.25mm_Layout4x7_P0.8mm_Ball0.45mm_Pad0.4
 Analog BGA-28 4.0mm x 6.25mm package, pitch 0.4mm pad, based on https://www.analog.com/media/en/technical-documentation/data-sheets/8063fa.pdf
@@ -83299,7 +83565,7 @@ Resistor Radial_Power series Radial pin pitch 7.37mm 10W length 16.1mm width 9mm
 0
 2
 2
-Resistors
+Resistor_custom
 3296W-1-504LF 500k Pot
 
 
@@ -83418,91 +83684,147 @@ ESP32-WROOM-32D 4MB (high t, pcb antenna)
 0
 38
 38
-SamacSys_Parts
+SamacSys
 BH18650PC
 BH-18650-PC-1
 Battery
 0
 2
 2
-SamacSys_Parts
+SamacSys
 CD123DB140LR
 SOD-123 
 Diode
 0
 2
 2
-SamacSys_Parts
+SamacSys
+CD214AB240LR
+CD214A-B240LR-4
+Diode
+0
+2
+2
+SamacSys
 DIOM7959X262N
 SS34
 Schottky Diode
 0
 2
 2
-SamacSys_Parts
+SamacSys
+INDC7066X280N
+MGAH06031R0M-10
+Inductor
+0
+2
+2
+SamacSys
 NE555DR
 D (R-PDSO-G8)
 Integrated Circuit
 0
 8
 8
-SamacSys_Parts
+SamacSys
+NX3225SA12MHZSTDCSR3
+NX3225SA-12MHZ-STD-CSR-3-1
+Crystal or Oscillator
+0
+4
+4
+SamacSys
+PTS636SP50SMTRLFS
+PTS636 SP50 SMTR LFS-3
+Switch
+0
+2
+2
+SamacSys
+QFN50P300X300X100-17N-D
+RGT0016C height 1
+Integrated Circuit
+0
+17
+17
+SamacSys
+RNS0007A
+RNS0007A
+Integrated Circuit
+0
+7
+7
+SamacSys
 SJ235954BSMTTR
 SJ2-35954B-SMT-TR-1
 Switch
 0
 5
 5
-SamacSys_Parts
+SamacSys
+SOIC127P600X175-8N
+8-Pin SOIC 150-mil (Package Code SN)
+Integrated Circuit
+0
+8
+8
+SamacSys
 SOIC127P600X175-9N
 SOP-8
 Connector
 0
 9
 9
-SamacSys_Parts
+SamacSys
+SOIC127P780X195-8N
+8-Pin SOIC 208-mil (Package Code S)
+Inductor
+0
+8
+8
+SamacSys
 SOP65P640X120-8N
 FS8205A
 MOSFET (N-Channel)
 0
 8
 8
-SamacSys_Parts
+SamacSys
 SOP65P640X120-14N
 14-Pin TSSOP
 Integrated Circuit
 0
 14
 14
-SamacSys_Parts
+SamacSys
 SOP65P640X120-24N
 24-Pin, 173mil Wide (TSSOP)
 Integrated Circuit
 0
 24
 24
-SamacSys_Parts
+SamacSys
 SOT95P237X112-3N
 sot 23_micro3 lead free
 Integrated Circuit
 0
 3
 3
-SamacSys_Parts
+SamacSys
 SOT95P280X145-5N
 DBV0005A_
 Integrated Circuit
 0
 5
 5
-SamacSys_Parts
+SamacSys
 SOT95P280X145-6N
 TSOT23-6/SOT23-6
 Integrated Circuit
 0
 6
 6
-SamacSys_Parts
+SamacSys
 SOT229P700X180-4N
 sot-223
 Integrated Circuit
