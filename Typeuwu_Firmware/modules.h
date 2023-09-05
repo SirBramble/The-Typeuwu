@@ -37,7 +37,7 @@
 #define COL12 27
 #define COL13 28
 #define COL14 29
-#define COL15 18
+#define COL15 15
 #define COL16 17
 #define COL17 12
 
