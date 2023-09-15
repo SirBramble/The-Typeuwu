@@ -14,6 +14,7 @@ private:
   uint8_t keycodeBuffer[6];
   uint8_t modifier;
   void send(uint8_t reportID);
+  void sendEmpty(uint8_t reportID);
   void clear(uint8_t reportID);
 };
 

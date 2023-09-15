@@ -28,25 +28,42 @@ void hidInterface::init(){
 }
 
 void hidInterface::press(key * inputKey){
+  if(inputKey == nullptr) return;
+  Serial.print("isSingle: "); Serial.println(inputKey->isSingleKey);
+  if(inputKey->isSingleKey == 0) return;
+  if(inputKey->isAnalog == 1) return;
+
   keysycode inputKeycode = inputKey->getKeysycode(0);
 
-  if(inputKeycode.modifier != 0) this->modifier = inputKeycode.modifier;
-
+  if(inputKey->isModifier && ((this->modifier & inputKeycode.modifier) == 0)){
+    this->modifier += inputKeycode.modifier;
+  }
+  Serial.print("KeycodeBuffer: ");
   for(uint8_t i = 0; i < 6; i++){
+    Serial.print(keycodeBuffer[i]);
     if(this->keycodeBuffer[i] == 0){
       keycodeBuffer[i] = inputKeycode.keycode;
+      break;
     }
   }
-
+  Serial.println();
+  this->sendEmpty(inputKeycode.reportID);
   this->send(inputKeycode.reportID);
 
   return;
 }
 
 void hidInterface::release(key * inputKey){
-  keysycode inputKeycode = inputKey->getKeysycode(0);
+  if(inputKey == nullptr) return;
+  Serial.print("input keysycode: "); Serial.println(inputKey->getKeysycode(0).keycode);
+  Serial.print("input keysycode 1: "); Serial.println(inputKey->getKeysycode(1).keycode);
+  if(inputKey->isSingleKey == 0) return;
+  if(inputKey->isAnalog == 1) return;
 
-  if(inputKeycode.modifier != 0) this->modifier = 0;
+  keysycode inputKeycode = inputKey->getKeysycode(0);
+  if(inputKey->isModifier && ((this->modifier & inputKeycode.modifier) > 0)){
+    this->modifier -= inputKeycode.modifier;
+  }
 
   for(uint8_t i = 0; i < 6; i++){
     if(this->keycodeBuffer[i] == inputKeycode.keycode){
@@ -60,6 +77,8 @@ void hidInterface::release(key * inputKey){
 }
 
 void hidInterface::sendMacro(key * inputKey){
+  if(inputKey == nullptr) return;
+  
   int keycodeBufferIndex = 0;
 
   this->clear(inputKey->getKeysycode(0).reportID);
@@ -81,6 +100,14 @@ void hidInterface::sendMacro(key * inputKey){
 void hidInterface::send(uint8_t reportID){
   while(!usb_hid.ready());
   usb_hid.keyboardReport(reportID, this->modifier, this->keycodeBuffer);
+
+  return;
+}
+
+void hidInterface::sendEmpty(uint8_t reportID){
+  while(!usb_hid.ready());
+  uint8_t emptyBuffer[6] = {0,0,0,0,0,0};
+  usb_hid.keyboardReport(reportID, this->modifier, emptyBuffer);
 
   return;
 }

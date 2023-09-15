@@ -19,22 +19,40 @@ void setup() {
   while( !TinyUSBDevice.mounted() ) Serial.println("crashing");
   keyboard.init();
   Serial.println("uwu Setup 5");
+  keyboard.updateKeymapsFromFile();
   prev = 0;
 }
 
 
 
 void loop() {
-  filesystemLoop();
+  //filesystemLoop();
   //keyboard.updateKeymapsFromFile();
+
+  if(check_fs_changed()){
+    keyboard.updateKeymapsFromFile();
+    set_fs_changed(false);
+  }
+
   if(millis() > prev + 1000){
     prev = millis();
     Serial.println("uwu");
     //Serial.println(digitalRead(11));
   }
 
-  keyboard.testKeys();
-  
+  //keyboard.testKeys();
+  keyboard.update();
+
+  for(int i = 0; i < AMMOUNT_KEYS; i++){
+    if(keyboard.isPressed_hold(i)){
+      Serial.println("pressing");
+      hid.press(keyboard.getKeyPointer(1, i + 1));
+    }
+    else if(keyboard.isReleased_hold(i)){
+      hid.release(keyboard.getKeyPointer(1, i + 1));
+    }
+  }
+
 
   //key * tmp = keyboard.getKeyPointer(1,1);
   //if(tmp != nullptr){

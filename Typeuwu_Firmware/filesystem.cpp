@@ -148,12 +148,16 @@ void filesystemLoop()
     root.close();
 
     Serial.println();
-    delay(1000); // refresh every 1 second
+
   }
 }
 
 bool check_fs_changed(){
   return fs_changed;
+}
+
+void set_fs_changed(bool state){
+  fs_changed = state;
 }
 
 void filesystemClear(){
@@ -285,6 +289,7 @@ key * module::getKeyPointer(uint16_t layer, uint16_t position){
 }
 
 void module::updateKeymapsFromFile(){
+  this->clearAll();
   Serial.println("update Keymaps from file");
   File32 Layout = fatfs.open(CONFIG_FILENAME, FILE_READ);
   if(!Layout){
@@ -418,6 +423,7 @@ void module::updateKeymapsFromFile(){
       positionCurrent = atoi(lineSearch.GetCapture(buf, 0));
       Serial.print("positionCurrent: ");Serial.println(positionCurrent);
       stringToInterpret += lineSearch.GetCapture(buf, 1);
+      Serial.print("first text as ASCII: ");Serial.println((uint8_t)stringToInterpret.charAt(0));
       interpret(this->getKeyPointer(layerCurrent, positionCurrent), stringToInterpret);       //CRASHED somewere in here!!!!
       stringToInterpret.remove(0);
     }
@@ -433,7 +439,7 @@ void interpreter::interpret(key * inputKey, String inputString){
     Serial.println("Nullus Mullus!!");
     return;
   }
-
+  inputKey->clearToZero();
   int itterations = 0;
 
   while(inputString.length() > 0 && itterations < MAX_WHILE_ITTERATIONS){
@@ -445,19 +451,250 @@ void interpreter::interpret(key * inputKey, String inputString){
 
     MatchState inputSearch;
     inputSearch.Target(inputBuffer);
-    if(inputSearch.Match("^([%a%d_]+)") == REGEXP_MATCHED){
+    if(inputSearch.Match("^([%a%d]+)") == REGEXP_MATCHED){
+      Serial.println("found letters");
       keycodeBufferString += inputSearch.GetCapture(buf, 0);
       stringToKeycodes(inputKey, keycodeBufferString);
       inputString.remove(0, keycodeBufferString.length());
     }
-    else break;
-
-    keycodeBufferString.remove(0);
+    if(inputSearch.Match("^([%+%-%.%^%$#,<]+)") == REGEXP_MATCHED){
+      Serial.println("found other shit");
+      keycodeBufferString += inputSearch.GetCapture(buf, 0);
+      stringToKeycodes(inputKey, keycodeBufferString);
+      inputString.remove(0, keycodeBufferString.length());
+    }
+    else if(inputSearch.Match("^(\\ae)") == REGEXP_MATCHED){
+      Serial.println("found ä");
+      inputKey->appendKeysycode(0x34, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 3);
+      Serial.print("inputString after ä: ");Serial.println(inputString.c_str());
+      Serial.print("size after ä: "); Serial.println(inputString.length());
+    }
+    else if(inputSearch.Match("^(\\AE)") == REGEXP_MATCHED){
+      Serial.println("found Ä");
+      inputKey->appendKeysycode(0x34, KEY_MOD_LSHIFT, RID_KEYBOARD, 1);
+      inputString.remove(0, 3);
+      Serial.print("inputString after Ä: ");Serial.println(inputString.c_str());
+      Serial.print("size after Ä: "); Serial.println(inputString.length());
+    }
+    else if(inputSearch.Match("^(\\oe)") == REGEXP_MATCHED){
+      Serial.println("found ö");
+      inputKey->appendKeysycode(0x33, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 3);
+    }
+    else if(inputSearch.Match("^(\\OE)") == REGEXP_MATCHED){
+      Serial.println("found Ö");
+      inputKey->appendKeysycode(0x33, KEY_MOD_LSHIFT, RID_KEYBOARD, 1);
+      inputString.remove(0, 3);
+    }
+    else if(inputSearch.Match("^(\\ue)") == REGEXP_MATCHED){
+      Serial.println("found ü");
+      inputKey->appendKeysycode(0x2F, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 3);
+    }
+    else if(inputSearch.Match("^(\\UE)") == REGEXP_MATCHED){
+      Serial.println("found Ü");
+      inputKey->appendKeysycode(0x2F, KEY_MOD_LSHIFT, RID_KEYBOARD, 1);
+      inputString.remove(0, 3);
+    }
+    else if(inputSearch.Match("^(\\SZ_KEY)") == REGEXP_MATCHED){
+      Serial.println("found SZ");
+      inputKey->appendKeysycode(0x2D, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 7);
+    }
+    else if(inputSearch.Match("^(\\GRAVE_KEY)") == REGEXP_MATCHED){
+      Serial.println("found GRAVE");
+      inputKey->appendKeysycode(0x2E, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 10);
+    }
+    else if(inputSearch.Match("^(\\LSHIFT_KEY)") == REGEXP_MATCHED){
+      Serial.println("found LSHIFT");
+      inputKey->isModifier = true;
+      inputKey->appendKeysycode(0, KEY_MOD_LSHIFT, RID_KEYBOARD, 1);
+      inputString.remove(0, 11);
+    }
+    else if(inputSearch.Match("^(\\LCTRL_KEY)") == REGEXP_MATCHED){
+      Serial.println("found LCRTL");
+      inputKey->isModifier = true;
+      inputKey->appendKeysycode(0, KEY_MOD_LCTRL, RID_KEYBOARD, 1);
+      inputString.remove(0, 10);
+    }
+    else if(inputSearch.Match("^(\\LALT_KEY)") == REGEXP_MATCHED){
+      Serial.println("found LALT");
+      inputKey->isModifier = true;
+      inputKey->appendKeysycode(0, KEY_MOD_LALT, RID_KEYBOARD, 1);
+      inputString.remove(0, 9);
+    }
+    else if(inputSearch.Match("^(\\WIN_KEY)") == REGEXP_MATCHED){
+      Serial.println("found WIN");
+      inputKey->isModifier = true;
+      inputKey->appendKeysycode(0, KEY_MOD_LMETA, RID_KEYBOARD, 1);
+      inputString.remove(0, 8);
+    }
+    else if(inputSearch.Match("^(\\APP_KEY)") == REGEXP_MATCHED){
+      Serial.println("found APP");
+      inputKey->appendKeysycode(0x65, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 8);
+    }
+    else if(inputSearch.Match("^(\\RSHIFT_KEY)") == REGEXP_MATCHED){
+      Serial.println("found RSHIFT");
+      inputKey->isModifier = true;
+      inputKey->appendKeysycode(0, KEY_MOD_RSHIFT, RID_KEYBOARD, 1);
+      inputString.remove(0, 11);
+    }
+    else if(inputSearch.Match("^(\\RCTRL_KEY)") == REGEXP_MATCHED){
+      Serial.println("found RCRTL");
+      inputKey->isModifier = true;
+      inputKey->appendKeysycode(0, KEY_MOD_RCTRL, RID_KEYBOARD, 1);
+      inputString.remove(0, 10);
+    }
+    else if(inputSearch.Match("^(\\RALT_KEY)") == REGEXP_MATCHED){
+      Serial.println("found RALT");
+      inputKey->isModifier = true;
+      inputKey->appendKeysycode(0, KEY_MOD_RALT, RID_KEYBOARD, 1);
+      inputString.remove(0, 9);
+    }
+    else if(inputSearch.Match("^(\\RMETA_KEY)") == REGEXP_MATCHED){
+      Serial.println("found RMETA");
+      inputKey->isModifier = true;
+      inputKey->appendKeysycode(0, KEY_MOD_RMETA, RID_KEYBOARD, 1);
+      inputString.remove(0, 10);
+    }
+    else if(inputSearch.Match("^(\\CAPS_LOCK_KEY)") == REGEXP_MATCHED){
+      Serial.println("found CAPS LOCK");
+      inputKey->appendKeysycode(0x39, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 14);
+    }
+    else if(inputSearch.Match("^(\\SPACE_KEY)") == REGEXP_MATCHED){
+      Serial.println("found SPACE");
+      inputKey->appendKeysycode(0x2C, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 10);
+    }
+    else if(inputSearch.Match("^(\\BACKSPACE_KEY)") == REGEXP_MATCHED){
+      Serial.println("found BACKSPACE");
+      inputKey->appendKeysycode(0x2A, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 14);
+    }
+    else if(inputSearch.Match("^(\\DEL_KEY)") == REGEXP_MATCHED){
+      Serial.println("found DEL");
+      inputKey->appendKeysycode(0x4C, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 8);
+    }
+    else if(inputSearch.Match("^(\\ENTER_KEY)") == REGEXP_MATCHED){
+      Serial.println("found ENTER");
+      inputKey->appendKeysycode(0x28, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 10);
+    }
+    else if(inputSearch.Match("^(\\ESC_KEY)") == REGEXP_MATCHED){
+      Serial.println("found ESC");
+      inputKey->appendKeysycode(0x29, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 8);
+    }
+    else if(inputSearch.Match("^(\\TAB_KEY)") == REGEXP_MATCHED){
+      Serial.println("found TAB");
+      inputKey->appendKeysycode(0x2B, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 8);
+    }
+    else if(inputSearch.Match("^(\\F1_KEY)") == REGEXP_MATCHED){
+      Serial.println("found F1");
+      inputKey->appendKeysycode(0x3A, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 7);
+    }
+    else if(inputSearch.Match("^(\\F2_KEY)") == REGEXP_MATCHED){
+      Serial.println("found F2");
+      inputKey->appendKeysycode(0x3B, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 7);
+    }
+    else if(inputSearch.Match("^(\\F3_KEY)") == REGEXP_MATCHED){
+      Serial.println("found F3");
+      inputKey->appendKeysycode(0x3C, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 7);
+    }
+    else if(inputSearch.Match("^(\\F4_KEY)") == REGEXP_MATCHED){
+      Serial.println("found F4");
+      inputKey->appendKeysycode(0x3D, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 7);
+    }
+    else if(inputSearch.Match("^(\\F5_KEY)") == REGEXP_MATCHED){
+      Serial.println("found F5");
+      inputKey->appendKeysycode(0x3E, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 7);
+    }
+    else if(inputSearch.Match("^(\\F6_KEY)") == REGEXP_MATCHED){
+      Serial.println("found F6");
+      inputKey->appendKeysycode(0x3F, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 7);
+    }
+    else if(inputSearch.Match("^(\\F7_KEY)") == REGEXP_MATCHED){
+      Serial.println("found F7");
+      inputKey->appendKeysycode(0x40, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 7);
+    }
+    else if(inputSearch.Match("^(\\F8_KEY)") == REGEXP_MATCHED){
+      Serial.println("found F8");
+      inputKey->appendKeysycode(0x41, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 7);
+    }
+    else if(inputSearch.Match("^(\\F9_KEY)") == REGEXP_MATCHED){
+      Serial.println("found F9");
+      inputKey->appendKeysycode(0x42, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 7);
+    }
+    else if(inputSearch.Match("^(\\F10_KEY)") == REGEXP_MATCHED){
+      Serial.println("found F10");
+      inputKey->appendKeysycode(0x43, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 8);
+    }
+    else if(inputSearch.Match("^(\\F11_KEY)") == REGEXP_MATCHED){
+      Serial.println("found F11");
+      inputKey->appendKeysycode(0x44, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 8);
+    }
+    else if(inputSearch.Match("^(\\F12_KEY)") == REGEXP_MATCHED){
+      Serial.println("found F12");
+      inputKey->appendKeysycode(0x45, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 8);
+    }
+    else if(inputSearch.Match("^(\\UP_KEY)") == REGEXP_MATCHED){
+      Serial.println("found UP");
+      inputKey->appendKeysycode(0x52, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 7);
+    }
+    else if(inputSearch.Match("^(\\DOWN_KEY)") == REGEXP_MATCHED){
+      Serial.println("found DOWN");
+      inputKey->appendKeysycode(0x51, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 9);
+    }
+    else if(inputSearch.Match("^(\\LEFT_KEY)") == REGEXP_MATCHED){
+      Serial.println("found UP");
+      inputKey->appendKeysycode(0x50, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 9);
+    }
+    else if(inputSearch.Match("^(\\RIGHT_KEY)") == REGEXP_MATCHED){
+      Serial.println("found RIGHT");
+      inputKey->appendKeysycode(0x4F, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, 10);
+    }
+    else{
+      Serial.println("broke");
+      keycodeBufferString.remove(0);
+      break;
+    }
+    
     delete[] inputBuffer;
     delete[] buf;
     itterations++;
   }
-  if(inputKey->getKeycodesSize() == 1) inputKey->isSingleKey == 1;
+  Serial.print("KeycodesSize: "); Serial.println(inputKey->getKeycodesSize());
+  if(inputKey->getKeycodesSize() == (uint16_t)1){
+    Serial.println("is single set");
+    inputKey->isSingleKey = true;
+  }
+  if(inputKey->getKeycodesSize() == (uint16_t)0){
+    Serial.println("key was empty after interpret");
+    inputKey->appendKeysycode(0,0,0,0);
+  }
+  Serial.print("is single read: ");Serial.println(inputKey->isSingleKey);
 }
 
 void interpreter::stringToKeycodes(key * inputKey, String inputString){

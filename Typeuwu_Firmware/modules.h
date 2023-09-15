@@ -9,7 +9,7 @@
 {15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,  0, 66, 67, 68},\
 {29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 28,  0,  0,  0},\
 {42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54,  0,  0, 69,  0},\
-{55, 56, 57,  0,  0,  0, 58,  0,  0, 59, 60, 61, 62,  0, 70, 71, 72},\
+{55, 56, 57,  0,  0,  0, 58,  0,  0, 59, 60, 61, 62,  0, 70, 71, 72}\
 
 
 #define AMMOUNT_KEYS 88
@@ -41,16 +41,31 @@
 #define COL16 17
 #define COL17 12
 
+typedef enum{
+  IDLE = 0,
+  TRANSITION,
+  PRESSED,
+  RELEASED
+} _state;
+
 class _keyboard : public module{
 public:
   _keyboard(String moduleName);
   void init();
   void testKeys();
+  bool isPressed(int position);
+  void update();
+  bool isPressed_hold(int position);
+  bool isReleased_hold(int position);      //true if released
+  bool isPressed_single(int position);
+  bool isReleased_single(int position);    //true if released
 private:
   int pins_row[AMMOUNT_ROW] = {ROW1, ROW2, ROW3, ROW4, ROW5, ROW6};
   int pins_col[AMMOUNT_COL] = {COL1, COL2, COL3, COL4, COL5, COL6, COL7, COL8, COL9, COL10, COL11, COL12, COL13, COL14, COL15, COL16, COL17};
-  bool pressed[AMMOUNT_KEYS];     //remember +1 for start count at 0
-  void update();
+  bool pressed[AMMOUNT_KEYS];     //remember -1 for start count at 0
+  //SM
+  _state states[AMMOUNT_KEYS];
+  void updateSM();
 };
 
 #endif // MODULES

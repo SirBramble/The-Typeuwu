@@ -167,6 +167,7 @@ void filesystemTest();
 void filesystemCreateConfig();
 
 bool check_fs_changed();
+void set_fs_changed(bool state);
 
 typedef struct Keysycode{
   uint8_t keycode;
@@ -185,6 +186,7 @@ public:
   uint16_t getKeycodesSize();
   void setAnalog(uint16_t value);
   uint16_t getAnalog();
+  bool isModifier = 0;      // flag used to identify a key as a modifier only
   bool isAnalog = 0;        // flag to identefy if "key" stores a analog value
   bool isSingleKey = 0;     // flag is set, if only a single Keycode is stored in the keycodes vector. Use flag to set a key as "hold until swtich released"
 private:
