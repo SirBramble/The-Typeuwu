@@ -47,7 +47,7 @@ void hidInterface::press(key * inputKey){
     }
   }
   Serial.println();
-  this->sendEmpty(inputKeycode.reportID);
+  //this->sendEmpty(inputKeycode.reportID);
   this->send(inputKeycode.reportID);
 
   return;

@@ -1,5 +1,6 @@
 #include "modules.h"
 #include "hidInterface.h"
+#include "lighting.h"
 
 #define SERIAL_DEBUG
 _keyboard keyboard("keyboard");
@@ -19,6 +20,7 @@ void setup() {
   while( !TinyUSBDevice.mounted() ) Serial.println("crashing");
   keyboard.init();
   Serial.println("uwu Setup 5");
+  lightingSetup();
   keyboard.updateKeymapsFromFile();
   prev = 0;
 }
@@ -62,6 +64,7 @@ void loop() {
   //  }
   //}
   //else Serial.println("There is no point... :(");
-  
+  //lightingLoop();
+  rainbow(10);
   delay(1);
 }

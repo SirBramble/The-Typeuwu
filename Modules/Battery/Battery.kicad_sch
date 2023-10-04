@@ -1,0 +1,54 @@
+(kicad_sch (version 20230121) (generator eeschema)
+
+  (uuid 5e90b4be-f726-48f1-ba15-bc9158342c0e)
+
+  (paper "A4")
+
+  (title_block
+    (title "Module battery/bluetooth")
+    (rev "1.0")
+    (company "FG Labs")
+  )
+
+  (lib_symbols
+  )
+
+
+  (sheet (at 106.68 23.495) (size 80.645 44.45) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 589dad59-2a70-454a-8b8a-c72c1503e32e)
+    (property "Sheetname" "Wireless" (at 106.68 22.7834 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "wireless.kicad_sch" (at 106.68 68.5296 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "Battery"
+        (path "/5e90b4be-f726-48f1-ba15-bc9158342c0e" (page "3"))
+      )
+    )
+  )
+
+  (sheet (at 24.765 23.495) (size 69.85 43.815) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 77d8e035-b474-4527-a813-6f685ff3c4f5)
+    (property "Sheetname" "Power" (at 24.765 22.7834 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "power.kicad_sch" (at 24.765 67.8946 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "Battery"
+        (path "/5e90b4be-f726-48f1-ba15-bc9158342c0e" (page "2"))
+      )
+    )
+  )
+
+  (sheet_instances
+    (path "/" (page "1"))
+  )
+)

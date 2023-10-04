@@ -1,4 +1,4 @@
-21800107360570212
+21812213133255318
 Antennas
 7488960245
 
@@ -49658,6 +49658,13 @@ Pin Header 1.27mm 8
 8
 8
 Connector_custom
+PinHeader_1x02_P2.54mm_Horizontal_SMD
+
+
+0
+0
+0
+Connector_custom
 SM02B-SRSS-TB(LF)(SN)
 
 
@@ -49699,6 +49706,13 @@ Screw Terminal sideways 5,08mm 4P
 0
 4
 4
+Connector_custom
+Tag connect mount
+
+
+0
+9
+6
 Connector_custom
 USAKRO_UK-USB
 
@@ -65039,6 +65053,20 @@ https://docs.arduino.cc/hardware/nano-33-iot
 PCM_arduino-library
 Arduino_Nano_33_IoT_Tile
 https://docs.arduino.cc/hardware/nano-33-iot
+
+0
+30
+30
+PCM_arduino-library
+Arduino_Nano_ESP32_Socket
+https://docs.arduino.cc/hardware/nano-esp32
+
+0
+30
+30
+PCM_arduino-library
+Arduino_Nano_ESP32_Tile
+https://docs.arduino.cc/hardware/nano-esp32
 
 0
 30
@@ -83742,7 +83770,7 @@ Switch
 2
 SamacSys
 QFN50P300X300X100-17N-D
-RGT0016C height 1
+BQ24075RGTR
 Integrated Circuit
 0
 17
@@ -83782,6 +83810,13 @@ Inductor
 0
 8
 8
+SamacSys
+SON50P300X200X60-9N
+USON 2x3x0.6-mm
+Integrated Circuit
+0
+9
+9
 SamacSys
 SOP65P640X120-8N
 FS8205A
@@ -83831,6 +83866,20 @@ Integrated Circuit
 0
 4
 4
+SamacSys
+TBAT54CLM
+SOT23
+MOSFET (N-Channel)
+0
+3
+3
+SamacSys
+TPS630701RNMR
+RNM0015A
+Integrated Circuit
+0
+17
+17
 Sensor
 Aosong_DHT11_5.5x12.0_P2.54mm
 Temperature and humidity module, http://akizukidenshi.com/download/ds/aosong/DHT11.pdf
