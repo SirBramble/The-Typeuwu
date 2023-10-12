@@ -65,7 +65,7 @@ Layer 1
 	Button 63:
 	Button 64:
 	Button 65:
-	Button 66:
+	Button 66: \DEL_KEY
 	Button 67:
 	Button 68:
 	Button 69: \UP_KEY
@@ -89,3 +89,7 @@ Layer 1
 	Button 87:
 	Button 88:
 end(keyboard)
+begin(numpad1)
+Layer 1
+	Button 1: 1
+end(numpad1)

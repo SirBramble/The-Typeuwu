@@ -442,6 +442,8 @@ void interpreter::interpret(key * inputKey, String inputString){
   inputKey->clearToZero();
   int itterations = 0;
 
+  char buff[50];
+
   while(inputString.length() > 0 && itterations < MAX_WHILE_ITTERATIONS){
     int inputLength = inputString.length() + 1;
     char * inputBuffer = new char[inputLength];
@@ -674,6 +676,15 @@ void interpreter::interpret(key * inputKey, String inputString){
       Serial.println("found RIGHT");
       inputKey->appendKeysycode(0x4F, 0, RID_KEYBOARD, 1);
       inputString.remove(0, 10);
+    }
+    else if(inputSearch.Match("^(\\MIDI_CC%{)([%d+]),([%d]+)%}") == REGEXP_MATCHED){  // \MIDI_CC{CHANNEL, CONTROL_NUM}   //Get value from Poti
+      Serial.println("found MIDI_CC");
+      inputKey->isAnalog = 1;
+      inputKey->isMIDI = 1;
+      inputKey->MIDI_mode = MIDI_CC;
+      inputKey->MIDI_data1 = atoi(inputSearch.GetCapture(buff,1));
+      inputKey->MIDI_channel = atoi(inputSearch.GetCapture(buff, 2));
+      inputString.remove(0, inputString.indexOf("}"));
     }
     else{
       Serial.println("broke");

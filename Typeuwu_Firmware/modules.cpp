@@ -121,3 +121,80 @@ bool _keyboard::isReleased_single(int position){
     return false;
   }
 }
+//----------------------------numpad--------------------------
+_numpad::_numpad(String moduleName, uint8_t address) : module(moduleName){
+  this->_address = address;
+}
+
+uint8_t _numpad::address(){
+  return _address;
+}
+
+void _numpad::update(uint8_t * input){
+  for(int i = 0; i < AMMOUNT_KEYS_NUMPAD; i++){
+    pressed[i] = input[i];
+  }
+
+  for(int i = 0; i < AMMOUNT_KEYS_NUMPAD; i++){
+    switch(states[i]){
+      case IDLE:
+        if(pressed[i]){
+          states[i] = TRANSITION;
+          //Serial.print("Transition numpad: ");Serial.print(pressed[i]);Serial.print(",");Serial.println(input[i]);
+        }
+        break;
+      case TRANSITION:
+        if(pressed[i]){
+          states[i] = PRESSED;
+        }
+        else {
+          states[i] = IDLE;
+        }
+        break;
+      case PRESSED:
+        if(pressed[i] == 0){
+          states[i] = RELEASED;
+        }
+        break;
+      case RELEASED:
+        states[i] = IDLE;
+        break;
+    }
+  }
+}
+
+bool _numpad::isPressed_hold(int position){
+  if(states[position] == TRANSITION){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+bool _numpad::isReleased_hold(int position){
+  if(states[position] == RELEASED){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+bool _numpad::isPressed_single(int position){
+  if(states[position] == TRANSITION){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+bool _numpad::isReleased_single(int position){
+  if(states[position] == PRESSED){
+    return true;
+  }
+  else{
+    return false;
+  }
+}

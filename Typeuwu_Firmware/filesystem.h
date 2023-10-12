@@ -160,6 +160,8 @@ enum
   RID_CONSUMER_CONTROL, // Media, volume etc ..
 };
 
+#define MIDI_CC 0xB0
+
 void filesystemSetup();
 void filesystemLoop();
 void filesystemClear();
@@ -189,6 +191,11 @@ public:
   bool isModifier = 0;      // flag used to identify a key as a modifier only
   bool isAnalog = 0;        // flag to identefy if "key" stores a analog value
   bool isSingleKey = 0;     // flag is set, if only a single Keycode is stored in the keycodes vector. Use flag to set a key as "hold until swtich released"
+  bool isMIDI = 0;          // flag to identefy if "key" stores a MIDI command
+  uint8_t MIDI_mode = 0;
+  uint8_t MIDI_data1 = 0;
+  uint8_t MIDI_data2 = 0;
+  uint8_t MIDI_channel = 0;
 private:
   std::vector <keysycode> keycodes;
   uint16_t analogValue = 0;     //use this for potentiometer values and the such

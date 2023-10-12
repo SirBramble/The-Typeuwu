@@ -1,7 +1,12 @@
+#include <stdint.h>
 #ifndef MODULES
 #define MODULES
 
 #include "filesystem.h"
+
+#define AMMOUNT_KEYS 88
+#define AMMOUNT_KEYS_NUMPAD 27      // actually 23, but for testing adding buffer
+
 
 #define KEY_REMAPPING \
 {73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 0 },\
@@ -10,9 +15,6 @@
 {29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 28,  0,  0,  0},\
 {42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54,  0,  0, 69,  0},\
 {55, 56, 57,  0,  0,  0, 58,  0,  0, 59, 60, 61, 62,  0, 70, 71, 72}\
-
-
-#define AMMOUNT_KEYS 88
 
 #define AMMOUNT_ROW 6
 #define ROW1 6
@@ -66,6 +68,23 @@ private:
   //SM
   _state states[AMMOUNT_KEYS];
   void updateSM();
+};
+
+class _numpad : public module{
+public:
+  _numpad(String moduleName, uint8_t address);
+  void init();
+  uint8_t address();
+  void update(uint8_t * input);
+  bool isPressed_hold(int position);
+  bool isReleased_hold(int position);      //true if released
+  bool isPressed_single(int position);
+  bool isReleased_single(int position);    //true if released
+private:
+  uint8_t _address;
+  uint8_t pressed[AMMOUNT_KEYS_NUMPAD];     //remember -1 for start count at 0
+  //SM
+  _state states[AMMOUNT_KEYS_NUMPAD];
 };
 
 #endif // MODULES

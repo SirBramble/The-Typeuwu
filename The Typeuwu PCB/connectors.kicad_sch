@@ -1206,6 +1206,10 @@
     (uuid f98b4a79-9223-43d4-881d-93484654d332)
   )
 
+  (text "Ups, forgot VCC and GND" (at 69.85 77.47 0)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid 3ae9aa2a-6743-4994-9b63-ff8d85cce1e5)
+  )
   (text "Bridge 5V and 5V_USB if NOT using\nthe Battery Module. Marked as BAT BYPASS on PCB."
     (at 40.005 163.83 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))

@@ -8,6 +8,8 @@ uint8_t const desc_hid_report[] =
 };
 
 Adafruit_USBD_HID usb_hid(desc_hid_report, sizeof(desc_hid_report), HID_ITF_PROTOCOL_NONE, 2, false);
+Adafruit_USBD_MIDI usb_midi;
+MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MIDI);
 
 //////////////////////////////USB_INTERFACE//////////////////////////
 
@@ -17,6 +19,7 @@ hidInterface::hidInterface(){
 
 void hidInterface::init(){
   usb_hid.begin();
+  MIDI.begin(MIDI_CHANNEL_OMNI);
   while(!TinyUSBDevice.mounted()){
     delay(100);
     Serial.println("crashing...");
@@ -25,6 +28,11 @@ void hidInterface::init(){
   for(int i = 0; i < 6; i++){
     this->keycodeBuffer[i] = 0;
   }
+  //for(int i = 0; i < 16; i++){
+  //  for(int n = 0; n < 256; n++){
+  //    midi_value_storage[i][n] = 0;
+  //  }
+  //}
 }
 
 void hidInterface::press(key * inputKey){
@@ -121,4 +129,20 @@ void hidInterface::clear(uint8_t reportID){
   usb_hid.keyboardReport(reportID, this->modifier, this->keycodeBuffer);
 
   return;
+}
+
+void hidInterface::sendMidi_Analog(key * inputKey, uint8_t value){
+  if(!inputKey->isMIDI) return;
+  
+  if(value != midi_value_storage[inputKey->MIDI_channel][inputKey->MIDI_data1]){
+    midi_value_storage[inputKey->MIDI_channel][inputKey->MIDI_data1] = value;
+    switch (inputKey->MIDI_mode) {
+      case MIDI_CC:
+        MIDI.sendControlChange(inputKey->MIDI_data1, value, inputKey->MIDI_channel);
+        Serial.print("Sending MIDI CC value: ");Serial.println(value);
+        break;
+      default:
+        break;
+    }
+  }
 }
