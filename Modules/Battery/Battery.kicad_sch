@@ -43,8 +43,14 @@
   )
 
 
+  (text "Place Mounting holes werever\nUse Cable to attach to main PCB"
+    (at 64.77 102.87 0)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid 6f7d5b07-ba97-496b-b75b-596d5e4eca8f)
+  )
+
   (symbol (lib_id "Mechanical:MountingHole") (at 40.005 96.52 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (in_bom no) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4b40149e-f8b6-45dc-a629-b21adf03ca6b)
     (property "Reference" "H1" (at 43.18 95.885 0)
       (effects (font (size 1.27 1.27)) (justify left))
@@ -52,7 +58,7 @@
     (property "Value" "MountingHole" (at 43.18 98.425 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 40.005 96.52 0)
+    (property "Footprint" "MountingHole:MountingHole_3.2mm_M3_DIN965" (at 40.005 96.52 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 40.005 96.52 0)
@@ -68,7 +74,7 @@
   )
 
   (symbol (lib_id "Mechanical:MountingHole") (at 40.005 103.505 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (in_bom no) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e42e4f2c-b0e2-4990-a776-5c1c3816e26e)
     (property "Reference" "H2" (at 43.18 102.87 0)
       (effects (font (size 1.27 1.27)) (justify left))
@@ -76,7 +82,7 @@
     (property "Value" "MountingHole" (at 43.18 105.41 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 40.005 103.505 0)
+    (property "Footprint" "MountingHole:MountingHole_3.2mm_M3_DIN965" (at 40.005 103.505 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 40.005 103.505 0)

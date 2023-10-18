@@ -1,4 +1,4 @@
-21812213133255318
+21820716781734798
 Antennas
 7488960245
 
@@ -49662,8 +49662,8 @@ PinHeader_1x02_P2.54mm_Horizontal_SMD
 
 
 0
-0
-0
+3
+2
 Connector_custom
 SM02B-SRSS-TB(LF)(SN)
 
@@ -59827,6 +59827,13 @@ Shielded High Current Inductor, body 41x36mm, https://www.we-online.com/catalog/
 THT
 0
 4
+2
+Inductor_custom
+EATON_EXL1V0402_4.6mmx4.6mm
+
+
+0
+2
 2
 Inductor_custom
 IHLP2020CZER100M01 2.5A 10uH
@@ -83713,6 +83720,20 @@ ESP32-WROOM-32D 4MB (high t, pcb antenna)
 38
 38
 SamacSys
+155124RS73200
+155124RS73200-1
+LED
+0
+3
+3
+SamacSys
+23370191
+2337019-1-2
+Connector
+0
+3
+3
+SamacSys
 BH18650PC
 BH-18650-PC-1
 Battery
@@ -83743,6 +83764,13 @@ Schottky Diode
 SamacSys
 INDC7066X280N
 MGAH06031R0M-10
+Inductor
+0
+2
+2
+SamacSys
+INDPM7166X300N
+7.1x6.6x3mm_21
 Inductor
 0
 2
@@ -83879,7 +83907,7 @@ RNM0015A
 Integrated Circuit
 0
 17
-17
+15
 Sensor
 Aosong_DHT11_5.5x12.0_P2.54mm
 Temperature and humidity module, http://akizukidenshi.com/download/ds/aosong/DHT11.pdf
@@ -84482,6 +84510,13 @@ Multi Hotswap with RGB
 0
 8
 6
+Switch footprints
+SLW-864547-5A-RA-D
+
+
+0
+5
+4
 Symbol
 CE-Logo_8.5x6mm_SilkScreen
 CE marking
