@@ -6,13 +6,16 @@
 
 class hidInterface{
 public:
-  hidInterface();
+  hidInterface(int bluetooth_timeout, uint8_t bluetooth_address);
   void init();
   void press(key * inputKey);       //send single key
   void release(key * inputKey);     //release single key
   void sendMacro(key * inputKey);
   void sendMidi_Analog(key * inputKey, uint8_t value);
 private:
+  int bluetooth_timeout;
+  bool bluetooth_mode;
+  uint8_t bluetooth_address;
   uint8_t keycodeBuffer[6];
   uint8_t modifier;
   void send(uint8_t reportID);

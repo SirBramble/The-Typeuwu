@@ -13,16 +13,23 @@ MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MIDI);
 
 //////////////////////////////USB_INTERFACE//////////////////////////
 
-hidInterface::hidInterface(){
+hidInterface::hidInterface(int bluetooth_timeout, uint8_t bluetooth_address){
   this->modifier = 0;
+  this->bluetooth_timeout = bluetooth_timeout;
+  this->bluetooth_address = bluetooth_address;
 }
 
 void hidInterface::init(){
   usb_hid.begin();
   MIDI.begin(MIDI_CHANNEL_OMNI);
-  while(!TinyUSBDevice.mounted()){
+  while(!TinyUSBDevice.mounted() && this->bluetooth_timeout > 0){
     delay(100);
+    this->bluetooth_timeout -= 100;
     Serial.println("crashing...");
+  }
+
+  if(bluetooth_timeout <= 0){
+    this->bluetooth_mode = 1;
   }
 
   for(int i = 0; i < 6; i++){
@@ -106,17 +113,37 @@ void hidInterface::sendMacro(key * inputKey){
 }
 
 void hidInterface::send(uint8_t reportID){
-  while(!usb_hid.ready());
-  usb_hid.keyboardReport(reportID, this->modifier, this->keycodeBuffer);
-
+  if(!this->bluetooth_mode){
+    while(!usb_hid.ready());
+    usb_hid.keyboardReport(reportID, this->modifier, this->keycodeBuffer);
+  }
+  else{
+    Wire.beginTransmission(this->bluetooth_address);
+    Wire.write(reportID);
+    Wire.write(this->modifier);
+    for(int i = 0; i < 6; i++){
+      Wire.write(keycodeBuffer[i]);
+    }
+    Wire.endTransmission();
+  }
   return;
 }
 
 void hidInterface::sendEmpty(uint8_t reportID){
-  while(!usb_hid.ready());
   uint8_t emptyBuffer[6] = {0,0,0,0,0,0};
-  usb_hid.keyboardReport(reportID, this->modifier, emptyBuffer);
-
+  if(!this->bluetooth_mode){
+    while(!usb_hid.ready());
+    usb_hid.keyboardReport(reportID, 0, emptyBuffer);
+  }
+  else{
+    Wire.beginTransmission(this->bluetooth_address);
+    Wire.write(reportID);
+    Wire.write(0);
+    for(int i = 0; i < 6; i++){
+      Wire.write(0);
+    }
+    Wire.endTransmission();
+  }
   return;
 }
 
@@ -125,8 +152,9 @@ void hidInterface::clear(uint8_t reportID){
     keycodeBuffer[i] = 0;
   }
   this->modifier = 0;
-  while(!usb_hid.ready());
-  usb_hid.keyboardReport(reportID, this->modifier, this->keycodeBuffer);
+  this->send(reportID);
+  //while(!usb_hid.ready());
+  //usb_hid.keyboardReport(reportID, this->modifier, this->keycodeBuffer);
 
   return;
 }

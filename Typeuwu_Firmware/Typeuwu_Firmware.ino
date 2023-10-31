@@ -5,13 +5,14 @@
 
 #define SERIAL_DEBUG
 #define ADDRESS_MODULE1 0x20
+#define ADDRESS_Bluetooth 0x69
 
 
 
 _keyboard keyboard("keyboard");
 _numpad numpad1("numpad1", ADDRESS_MODULE1);
 i2cInterface i2c;
-hidInterface hid;
+hidInterface hid(1000, ADDRESS_Bluetooth);
 uint64_t prev;
 
 void setup() {
