@@ -283,9 +283,23 @@ void module::clearAll(){
     return;
 }
 
-key * module::getKeyPointer(uint16_t layer, uint16_t position){
-    if(layer < layers.size()) return layers.at(layer).getKeyPointer(position);
+key * module::getKeyPointer(uint16_t position){
+    if(this->current_layer < layers.size()) return layers.at(this->current_layer).getKeyPointer(position);
     else return nullptr;
+}
+
+key * module::getKeyPointerAtLayer(uint16_t position, uint16_t layer){
+  if(layer < layers.size()) return layers.at(layer).getKeyPointer(position);
+  else return nullptr;
+}
+
+void module::setLayer(uint16_t layer){
+  this->current_layer = layer;
+  return;
+}
+
+rgb_wrapper_t module::getLayerLightingEffect(){
+  return this->layer_colors.at(this->current_layer);
 }
 
 void module::updateKeymapsFromFile(){
@@ -381,12 +395,13 @@ void module::updateKeymapsFromFile(){
 
     MatchState lineSearch;
     lineSearch.Target(lineBuffer);
-    if(lineSearch.Match("Layer (%d+)", 0) == REGEXP_MATCHED){
+    if(lineSearch.Match("^([ \t]*)%%", 0) == REGEXP_MATCHED){}
+    else if(lineSearch.Match("Layer (%d+)", 0) == REGEXP_MATCHED){
       layerCurrent = atoi(lineSearch.GetCapture(buf, 0));
       Serial.print("Layer current: ");Serial.println(layerCurrent);
       if(layerCurrent > layerMax) layerMax = layerCurrent;
     }
-    if(lineSearch.Match("Button (%d+)", 0) == REGEXP_MATCHED){
+    else if(lineSearch.Match("Button (%d+)", 0) == REGEXP_MATCHED){
       positionCurrent = atoi(lineSearch.GetCapture(buf, 0));
       Serial.print("Position Current: ");Serial.println(positionCurrent);
       if(positionCurrent > positionMax) positionMax = positionCurrent;
@@ -398,6 +413,9 @@ void module::updateKeymapsFromFile(){
   Serial.print("positionMax: "); Serial.println(positionMax);
   //return;     //worked till here
   this->setSize(layerMax + (uint16_t)1, positionMax + (uint16_t)1);     // + 1 because start counting at 1 not 0
+
+  layer_colors.resize(layerMax + 1);
+
   //return;     //worked till here
   //Second Run to get Strings
   while(moduleStringSecond.length() > 0){       //perhaps make > 1
@@ -414,17 +432,46 @@ void module::updateKeymapsFromFile(){
     buf = new char[lineLength];
     line.toCharArray(lineBuffer, lineLength);
 
+    std::string buf_effect;
+    uint32_t buf_color = 0;
+    uint32_t buf_speed = 0;
+
     MatchState lineSearch;
     lineSearch.Target(lineBuffer);
-    if(lineSearch.Match("Layer (%d+)", 0) == REGEXP_MATCHED){
+    
+    if(lineSearch.Match("^([ \t]*)%%", 0) == REGEXP_MATCHED){}
+    else if(lineSearch.Match("Layer (%d+) (COLOR%{)([%a]+)%}", 0) == REGEXP_MATCHED){
       layerCurrent = atoi(lineSearch.GetCapture(buf, 0));
+      Serial.printf("found COLOR MODE on layer: %d\n", layerCurrent);
+      buf_effect += lineSearch.GetCapture(buf,2);
+      layer_colors.at(layerCurrent) = string_to_color_effect(buf_effect);
     }
-    if(lineSearch.Match("Button (%d+): (.*)", 0) == REGEXP_MATCHED){
+    else if(lineSearch.Match("Layer (%d+) (COLOR%{)([%a]+),([%a]+)%}", 0) == REGEXP_MATCHED){
+      layerCurrent = atoi(lineSearch.GetCapture(buf, 0));
+      Serial.printf("found COLOR MODE + COLOR on layer: %d\n", layerCurrent);
+      buf_effect += lineSearch.GetCapture(buf,2);
+      buf_color = string_to_color(lineSearch.GetCapture(buf,3));
+      layer_colors.at(layerCurrent) = string_to_color_effect(buf_effect , buf_color);
+    }
+    else if(lineSearch.Match("Layer (%d+) (COLOR%{)([%a]+),([%a]+),([%d]+)%}", 0) == REGEXP_MATCHED){
+      layerCurrent = atoi(lineSearch.GetCapture(buf, 0));
+      Serial.printf("found COLOR MODE + COLOR on layer: %d\n", layerCurrent);
+      buf_effect += lineSearch.GetCapture(buf,2);
+      buf_color = string_to_color(lineSearch.GetCapture(buf,3));
+      buf_speed = atoi(lineSearch.GetCapture(buf, 4));
+      layer_colors.at(layerCurrent) = string_to_color_effect(buf_effect , buf_color , buf_speed);
+    }
+    else if(lineSearch.Match("Layer (%d+)", 0) == REGEXP_MATCHED){
+      layerCurrent = atoi(lineSearch.GetCapture(buf, 0));
+      layer_colors.at(layerCurrent) = {effect_rainbow,0,5}; // set to default
+    }
+    else if(lineSearch.Match("Button (%d+): (.*)", 0) == REGEXP_MATCHED){
       positionCurrent = atoi(lineSearch.GetCapture(buf, 0));
       Serial.print("positionCurrent: ");Serial.println(positionCurrent);
       stringToInterpret += lineSearch.GetCapture(buf, 1);
       Serial.print("first text as ASCII: ");Serial.println((uint8_t)stringToInterpret.charAt(0));
-      interpret(this->getKeyPointer(layerCurrent, positionCurrent), stringToInterpret);       //CRASHED somewere in here!!!!
+      //this->setLayer(layerCurrent);
+      interpret(this->getKeyPointerAtLayer(positionCurrent, layerCurrent), stringToInterpret);       //CRASHED somewere in here!!!!
       stringToInterpret.remove(0);
     }
     delete[] buf;
@@ -443,6 +490,7 @@ void interpreter::interpret(key * inputKey, String inputString){
   int itterations = 0;
 
   char buff[50];
+  uint16_t tmp_counter = 0;
 
   while(inputString.length() > 0 && itterations < MAX_WHILE_ITTERATIONS){
     int inputLength = inputString.length() + 1;
@@ -450,16 +498,23 @@ void interpreter::interpret(key * inputKey, String inputString){
     inputString.toCharArray(inputBuffer, inputLength);
     char * buf = new char[inputLength];
     String keycodeBufferString;
-
+    Serial.printf("input Buffer: ");
+    for(int i = 0; i < inputLength; i++){
+      Serial.printf("%c", inputBuffer[i]);
+    }
+    Serial.printf("\n");
+    
     MatchState inputSearch;
     inputSearch.Target(inputBuffer);
     if(inputSearch.Match("^([%a%d]+)") == REGEXP_MATCHED){
-      Serial.println("found letters");
+      Serial.printf("found letters: %s\n", keycodeBufferString.c_str());
       keycodeBufferString += inputSearch.GetCapture(buf, 0);
       stringToKeycodes(inputKey, keycodeBufferString);
-      inputString.remove(0, keycodeBufferString.length());
+      inputString.remove(0, keycodeBufferString.indexOf('\0'));
+      //keycodeBufferString.remove(0);
+      Serial.printf("buffer String Index of \\0: %d\n", keycodeBufferString.indexOf('\0'));
     }
-    if(inputSearch.Match("^([%+%-%.%^%$#,<]+)") == REGEXP_MATCHED){
+    else if(inputSearch.Match("^([=!_%[%]%+%-%.%^%$#,<{}| ]+)") == REGEXP_MATCHED){
       Serial.println("found other shit");
       keycodeBufferString += inputSearch.GetCapture(buf, 0);
       stringToKeycodes(inputKey, keycodeBufferString);
@@ -520,6 +575,15 @@ void interpreter::interpret(key * inputKey, String inputString){
       inputKey->isModifier = true;
       inputKey->appendKeysycode(0, KEY_MOD_LCTRL, RID_KEYBOARD, 1);
       inputString.remove(0, 10);
+    }
+    else if(inputSearch.Match("^(\\STRG%{)([%a])%}") == REGEXP_MATCHED){
+      Serial.println("found STRG");
+      inputSearch.GetCapture(buff,1);
+      Serial.printf("buff[0]: %c\n", buff[0]);
+      //inputKey->appendKeysycode(0, KEY_MOD_LCTRL, RID_KEYBOARD, 1);
+      inputKey->appendKeysycode(ASCII_conv_table_german[buff[0]][1], KEY_MOD_LCTRL, RID_KEYBOARD, 1);
+      //inputKey->appendKeysycode(0, 0, RID_KEYBOARD, 1);
+      inputString.remove(0, inputString.indexOf("}")+1);
     }
     else if(inputSearch.Match("^(\\LALT_KEY)") == REGEXP_MATCHED){
       Serial.println("found LALT");
@@ -667,31 +731,81 @@ void interpreter::interpret(key * inputKey, String inputString){
       inputKey->appendKeysycode(0x51, 0, RID_KEYBOARD, 1);
       inputString.remove(0, 9);
     }
+    else if(inputSearch.Match("^(\\LEFT_KEY%{)([%d]+)%}") == REGEXP_MATCHED){
+      Serial.println("found LEFT COUNT");
+      tmp_counter = atoi(inputSearch.GetCapture(buff,1));
+      for(int i = 0; i < tmp_counter; i++){
+        inputKey->appendKeysycode(0x50, 0, RID_KEYBOARD, 1);
+      }
+      inputString.remove(0, inputString.indexOf("}")+1);
+    }
     else if(inputSearch.Match("^(\\LEFT_KEY)") == REGEXP_MATCHED){
-      Serial.println("found UP");
+      Serial.println("found LEFT");
       inputKey->appendKeysycode(0x50, 0, RID_KEYBOARD, 1);
       inputString.remove(0, 9);
+    }
+    else if(inputSearch.Match("^(\\RIGHT_KEY%{)([%d]+)%}") == REGEXP_MATCHED){
+      Serial.println("found RIGHT COUNT");
+      tmp_counter = atoi(inputSearch.GetCapture(buff,1));
+      for(int i = 0; i < tmp_counter; i++){
+        inputKey->appendKeysycode(0x4F, 0, RID_KEYBOARD, 1);
+      }
+      inputString.remove(0, inputString.indexOf("}")+1);
     }
     else if(inputSearch.Match("^(\\RIGHT_KEY)") == REGEXP_MATCHED){
       Serial.println("found RIGHT");
       inputKey->appendKeysycode(0x4F, 0, RID_KEYBOARD, 1);
       inputString.remove(0, 10);
     }
-    else if(inputSearch.Match("^(\\MIDI_CC%{)([%d+]),([%d]+)%}") == REGEXP_MATCHED){  // \MIDI_CC{CHANNEL, CONTROL_NUM}   //Get value from Poti
+    else if(inputSearch.Match("^(\\MIDI_CC%{)([%d]+),([%d]+)%}") == REGEXP_MATCHED){  // \MIDI_CC{CHANNEL,CONTROL_NUM}   //Get value from Poti
       Serial.println("found MIDI_CC");
       inputKey->isAnalog = 1;
       inputKey->isMIDI = 1;
       inputKey->MIDI_mode = MIDI_CC;
       inputKey->MIDI_data1 = atoi(inputSearch.GetCapture(buff,1));
       inputKey->MIDI_channel = atoi(inputSearch.GetCapture(buff, 2));
-      inputString.remove(0, inputString.indexOf("}"));
+      inputString.remove(0, inputString.indexOf("}")+1);
+    }
+    else if(inputSearch.Match("^(\\MIDI_CC_KEY%{)([%d]+),([%d]+)%}") == REGEXP_MATCHED){  // \MIDI_CC{CHANNEL,CONTROL_NUM}   //Get value from Poti
+      Serial.println("found MIDI_CC_KEY");
+      inputKey->isMIDI = 1;
+      inputKey->MIDI_mode = MIDI_CC;
+      inputKey->MIDI_data1 = atoi(inputSearch.GetCapture(buff,1));
+      inputKey->MIDI_channel = atoi(inputSearch.GetCapture(buff, 2));
+      inputString.remove(0, inputString.indexOf("}")+1);
+    }
+    else if(inputSearch.Match("^(\\COLOR%{)([%a]+),([%a]+)%}") == REGEXP_MATCHED){  // \COLOR{MODE,COLOR}
+      Serial.println("found COLOR");
+      inputKey->color_mode = string_to_color_mode(inputSearch.GetCapture(buff,1));
+      inputKey->color = string_to_color(inputSearch.GetCapture(buff,2));
+      inputString.remove(0, inputString.indexOf("}")+1);
+    }
+    else if(inputSearch.Match("^(\\COLOR%{)([%a]+),([%d]+),([%d]+),([%d]+)%}") == REGEXP_MATCHED){  // \COLOR{MODE,R,G,B}
+      Serial.println("found COLOR_RGB");
+      inputKey->color_mode = string_to_color_mode(inputSearch.GetCapture(buff,1));
+      uint8_t r = atoi(inputSearch.GetCapture(buff, 2));
+      uint8_t g = atoi(inputSearch.GetCapture(buff, 3));
+      uint8_t b = atoi(inputSearch.GetCapture(buff, 4));
+      inputKey->color = ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
+      inputString.remove(0, inputString.indexOf("}")+1);
+    }
+    else if(inputSearch.Match("^(\\LAYER%{)([%d]+)%}") == REGEXP_MATCHED){  // \MIDI_CC{CHANNEL,CONTROL_NUM}   //Get value from Poti
+      Serial.println("found Layer change");
+      inputKey->hasLayerChange = true;
+      inputKey->changeToLayer = atoi(inputSearch.GetCapture(buff,1));
+      inputString.remove(0, inputString.indexOf("}")+1);
+    }
+    else if(inputSearch.Match("^([\\]+)") == REGEXP_MATCHED){
+      Serial.println("found backslash");
+      keycodeBufferString += inputSearch.GetCapture(buf, 0);
+      inputKey->appendKeysycode(0x2D, KEY_MOD_RALT, RID_KEYBOARD, 1);
+      inputString.remove(0, keycodeBufferString.length());
     }
     else{
       Serial.println("broke");
       keycodeBufferString.remove(0);
       break;
     }
-    
     delete[] inputBuffer;
     delete[] buf;
     itterations++;
@@ -711,19 +825,120 @@ void interpreter::interpret(key * inputKey, String inputString){
 void interpreter::stringToKeycodes(key * inputKey, String inputString){
   // clear keysycode vector with key.clearToZero()
 
-  inputKey->clearToZero();
+  //inputKey->clearToZero();
+
+  uint8_t sendimediate = 0;
+
+  if(inputKey->getKeycodesSize() > 0){
+    sendimediate = 1;
+  }
+
   for(uint16_t i = 0; i < inputString.length(); i++){           //may need +1
-    uint8_t sendimediate = 0;
     if(inputString.charAt(i+1) != -1){
       if(ASCII_conv_table_german[inputString.charAt(i)][0] != ASCII_conv_table_german[inputString.charAt(i + 1)][0]){
         sendimediate = 1;
       }
     }
+    Serial.printf("running stringToKeycode with char: %c\n", inputString.charAt(i));
+    if(inputString.length() - i == 1){
+      sendimediate = 1;
+    }
     inputKey->appendKeysycode(ASCII_conv_table_german[inputString.charAt(i)][1], ASCII_conv_table_german[inputString.charAt(i)][0], RID_KEYBOARD, sendimediate);
+    sendimediate = 0;
   }
   return;
 }
 
+uint32_t interpreter::string_to_color(char *input){
+  std::string buffer;
+  uint8_t r,g,b;
+
+  buffer.append(input);
+
+  if(buffer.find("RED", 0) != -1 || buffer.find("red", 0) != -1){
+    r = 255;
+    g = 0;
+    b = 0;
+  }
+  else if(buffer.find("YELLOW", 0) != -1 || buffer.find("yellow", 0) != -1){
+    r = 255;
+    g = 255;
+    b = 0;
+  }
+  else if(buffer.find("GREEN", 0) != -1 || buffer.find("green", 0) != -1){
+    r = 0;
+    g = 255;
+    b = 0;
+  }
+  else if(buffer.find("CYAN", 0) != -1 || buffer.find("cyan", 0) != -1){
+    r = 0;
+    g = 255;
+    b = 255;
+  }
+  else if(buffer.find("BLUE", 0) != -1 || buffer.find("blue", 0) != -1){
+    r = 0;
+    g = 0;
+    b = 255;
+  }
+  else if(buffer.find("MAGENTA", 0) != -1 || buffer.find("magenta", 0) != -1){
+    r = 255;
+    g = 0;
+    b = 255;
+  }
+  else if(buffer.find("WHITE", 0) != -1 || buffer.find("white", 0) != -1){
+    r = 255;
+    g = 255;
+    b = 255;
+  }
+  else{
+    r = 0;
+    g = 0;
+    b = 0;
+  }
+
+  return ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
+
+}
+
+color_mode_t interpreter::string_to_color_mode(char *input){
+  std::string buffer;
+
+  buffer.append(input);
+
+  if(buffer.find("PRESSED",0) != -1 || buffer.find("pressed",0) != -1){
+    return pressed;
+  }
+  else if(buffer.find("NOT PRESSED",0) != -1 || buffer.find("not pressed",0) != -1){
+    return not_pressed;
+  }
+  else if(buffer.find("TOGGLE",0) != -1 || buffer.find("toggle",0) != -1){
+    return toggle;
+  }
+  else if(buffer.find("MIDI",0) != -1 || buffer.find("midi",0) != -1){
+    return midi_bound;
+  }
+  else if(buffer.find("DISABLED",0) != -1 || buffer.find("disabled",0) != -1){
+    return disabled;
+  }
+  else{
+    Serial.printf("no string_to_color found\n");
+    return no_override;
+  }
+}
+rgb_wrapper_t interpreter::string_to_color_effect(std::string effect, uint32_t color, uint32_t speed){
+  
+  if(effect.find("RAINBOW",0) != -1 || effect.find("rainbow",0) != -1){
+    return {effect_rainbow, color, speed};
+  }
+  else if(effect.find("CONST_COLOR",0) != -1 || effect.find("const_color",0) != -1 || effect.find("CONST",0) != -1 || effect.find("const",0) != -1){
+    return {effect_const_color, color, speed};
+  }
+  else{
+    Serial.printf("no effect found. Parameters: Input: %s, input_size: %d, color: %d, speed: %d\n", effect.c_str(), effect.size(), color, speed);
+    return {effect_rainbow, 0, 5};    //default  
+  }
+  
+}
 // make seperate Funktion to check for immediate Send!!!! Will make Life a lot easier
 
 

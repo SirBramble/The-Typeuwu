@@ -5,6 +5,8 @@
 #include <vector>
 #include <Arduino.h>
 #include "Adafruit_TinyUSB.h"
+#include <string>
+#include "lighting.h"
 
 #define MAX_WHILE_ITTERATIONS 3000          //limits the ammount of runs, that some while loops can do. Supposed to preven freezing
 #define CONFIG_FILENAME "Layout.txt"
@@ -178,6 +180,15 @@ typedef struct Keysycode{
   uint8_t immediateSend;
 }keysycode;
 
+typedef enum{
+  no_override = 0,
+  pressed,
+  not_pressed,
+  toggle,
+  midi_bound,     // only woks if MIDI CC command was bound for Key. Uses same channel and number as set in key
+  disabled
+}color_mode_t;
+
 class key{
 public:
   key(void);                // init with empty element in keysycode vector
@@ -191,11 +202,23 @@ public:
   bool isModifier = 0;      // flag used to identify a key as a modifier only
   bool isAnalog = 0;        // flag to identefy if "key" stores a analog value
   bool isSingleKey = 0;     // flag is set, if only a single Keycode is stored in the keycodes vector. Use flag to set a key as "hold until swtich released"
+  
+  // change Layer
+  bool hasLayerChange = 0;
+  uint16_t changeToLayer = 0;
+  
+  //MIDI
   bool isMIDI = 0;          // flag to identefy if "key" stores a MIDI command
   uint8_t MIDI_mode = 0;
   uint8_t MIDI_data1 = 0;
   uint8_t MIDI_data2 = 0;
   uint8_t MIDI_channel = 0;
+
+  // color
+  color_mode_t color_mode = no_override;
+  uint32_t color = 0;
+  bool current_state = false;
+
 private:
   std::vector <keysycode> keycodes;
   uint16_t analogValue = 0;     //use this for potentiometer values and the such
@@ -215,6 +238,9 @@ class interpreter{
 public:
   void interpret(key * inputKey, String inputString);
   void stringToKeycodes(key * inputKey, String inputString);
+  uint32_t string_to_color(char *input);
+  color_mode_t string_to_color_mode(char *input);
+  rgb_wrapper_t string_to_color_effect(std::string effect, uint32_t color = 0, uint32_t speed = 5);
 };
 
 class module: public interpreter{
@@ -222,13 +248,17 @@ public:
   module(String moduleName);
   void setSize(uint16_t ammountLayers, uint16_t ammountKeys);
   void clearAll();
-  key * getKeyPointer(uint16_t layer, uint16_t position);
+  key * getKeyPointer(uint16_t position);
+  void setLayer(uint16_t layer);
+  rgb_wrapper_t getLayerLightingEffect();
   void updateKeymapsFromFile();
   String moduleName;
+  uint16_t current_layer = 1;
 private:
   std::vector <keySet> layers;
+  std::vector <rgb_wrapper_t> layer_colors;
+  key * getKeyPointerAtLayer(uint16_t position, uint16_t layer);
 };
-
 
 // Make USB Interface class that gets key pointer as input
 

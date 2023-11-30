@@ -10,52 +10,150 @@ int           pixelCycle = 0;           // Pattern Pixel Cycle
 uint16_t      pixelCurrent = 0;         // Pattern Current Pixel Number
 uint16_t      pixelNumber = LED_COUNT;  // Total Number of Pixels
 
-Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+//Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
+RGB_LIGHTING::RGB_LIGHTING(uint8_t led_pin, uint16_t led_count, uint8_t led_max_brightness){
+  this->led_pin = led_pin;
+  this->led_count = led_count + 1;
+  this->led_max_brightness = led_max_brightness;
+  this->strip = new Adafruit_NeoPixel(this->led_count, this->led_pin, NEO_GRB + NEO_KHZ800);
+  this->effect_override = new bool[this->led_count];
+}
+
+RGB_LIGHTING::~RGB_LIGHTING(){
+  delete this->strip;
+  delete [] this->effect_override;
+  delete [] this->led_remap;
+}
+
+void RGB_LIGHTING::setup(){
+  for(int i = 0; i < AMMOUNT_EFFECTS; i++){
+    this->effect_delays[i] = DEFAULT_EFFECT_SPEED;
+  }
+
+  for(uint16_t i = 0; i < this->led_count; i++){
+    this->effect_override[i] = 0;
+  }
+
+  this->strip->begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
+  this->strip->show();            // Turn OFF all pixels ASAP
+  this->strip->setBrightness(this->led_max_brightness); // Set BRIGHTNESS to about 1/5 (max = 255)
+  this->strip->setPixelColor(4, strip->Color(0, 200, 0));
+  this->strip->show();
+}
+
+void RGB_LIGHTING::set_effect(rgb_wrapper_t wrapper){
+  this->effect_set = wrapper.effect;
+  this->const_color = wrapper.color;
+  this->effect_delays[this->effect_set] = (uint16_t)(100 / wrapper.speed);
+}
+
+void RGB_LIGHTING::set_led_remap(uint8_t *led_remap, uint8_t size){
+  if(this->led_remap != NULL){
+    delete [] this->led_remap;
+  }
+  this->led_remap = new uint8_t[size];
+  for(int i = 0; i < size; i++){
+    this->led_remap[i] = led_remap[i];
+  }
+}
+
+bool RGB_LIGHTING::enable_override(uint16_t position, uint32_t color){
+  if(led_remap[position] > this->led_count) return false;
+
+  this->effect_override[led_remap[position]] = true;
+  this->strip->setPixelColor(led_remap[position], color);
+
+  return true;
+}
+
+bool RGB_LIGHTING::toggle_override(uint16_t position, uint32_t color){
+  if(led_remap[position] > this->led_count) return false;
+
+  this->effect_override[led_remap[position]] = !this->effect_override[led_remap[position]]; // toggle
+  if(this->effect_override[led_remap[position]]){
+    this->strip->setPixelColor(led_remap[position], color);
+  }
+  
+
+  return true;
+}
+
+bool RGB_LIGHTING::disable_override(uint16_t position){
+  if(led_remap[position] > this->led_count) return false;
+
+  this->effect_override[led_remap[position]] = false;
+
+  this->strip->setPixelColor(led_remap[position], 0);
+
+  return true;
+}
+
+void RGB_LIGHTING::update(){
+  if(millis() < this->time_prev){   // millis() overflow detection
+    this->time_prev = millis();
+  }
+
+  if((this->time_prev + this->effect_delays[this->effect_set]) < millis()){
+    this->time_prev = millis();
+    switch (this->effect_set) {
+      case effect_rainbow:
+        for(uint16_t i=0; i < this->led_count; i++) {
+          if(this->effect_override[i] == 0){
+            strip->setPixelColor(i, this->wheel((i + rainbow_pixelCycle) & 255));
+          }
+        }
+        rainbow_pixelCycle++;                             //  Advance current cycle
+        if(rainbow_pixelCycle >= 256)
+          rainbow_pixelCycle = 0;                         //  Loop the cycle back to the begining
+        break;
+      case effect_const_color:
+        for(uint16_t i=0; i < this->led_count; i++) {
+          if(this->effect_override[i] == 0){
+            strip->setPixelColor(i, this->const_color);
+          }
+        }
+        break;
+    }
+  }
+  strip->show();
+}
+
+//rainbow functions
+uint32_t RGB_LIGHTING::wheel(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+    return this->strip->Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if(WheelPos < 170) {
+    WheelPos -= 85;
+    return this->strip->Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return this->strip->Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
+
+//const color functions
+void RGB_LIGHTING::set_const_color(uint8_t red, uint8_t green, uint8_t blue){
+  this->const_color = this->strip->Color(red,green,blue);
+}
+
+void RGB_LIGHTING::set_const_color(uint32_t color){
+  this->const_color = color;
+}
+
+uint32_t RGB_LIGHTING::color(uint8_t red, uint8_t green, uint8_t blue){
+  return this->strip->Color(red,green,blue);
+}
+
+
+/*
 void lightingSetup(){
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // Turn OFF all pixels ASAP
   strip.setBrightness(LED_BRIGHTNESS); // Set BRIGHTNESS to about 1/5 (max = 255)
-}
-
-void lightingLoop(){
-  unsigned long currentMillis = millis();                     //  Update current time
-  if((currentMillis - patternPrevious) >= patternInterval) {  //  Check for expired time
-    patternPrevious = currentMillis;
-    patternCurrent++;                                         //  Advance to next pattern
-    if(patternCurrent >= 7)
-      patternCurrent = 0;
-  }
-  
-  if(currentMillis - pixelPrevious >= pixelInterval) {        //  Check for expired time
-    pixelPrevious = currentMillis;                            //  Run current frame
-    switch (patternCurrent) {
-      case 7:
-        theaterChaseRainbow(50); // Rainbow-enhanced theaterChase variant
-        break;
-      case 6:
-        rainbow(10); // Flowing rainbow cycle along the whole strip
-        break;     
-      case 5:
-        theaterChase(strip.Color(0, 0, 127), 50); // Blue
-        break;
-      case 4:
-        theaterChase(strip.Color(127, 0, 0), 50); // Red
-        break;
-      case 3:
-        theaterChase(strip.Color(127, 127, 127), 50); // White
-        break;
-      case 2:
-        colorWipe(strip.Color(0, 0, 255), 50); // Blue
-        break;
-      case 1:
-        colorWipe(strip.Color(0, 255, 0), 50); // Green
-        break;        
-      default:
-        colorWipe(strip.Color(255, 0, 0), 50); // Red
-        break;
-    }
-  }
+  strip.setPixelColor(4, strip.Color(0, 200, 0));
+  strip.show();
 }
 
 void colorWipe(uint32_t color, int wait) {
@@ -132,3 +230,5 @@ uint32_t Wheel(byte WheelPos) {
   WheelPos -= 170;
   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
+
+*/

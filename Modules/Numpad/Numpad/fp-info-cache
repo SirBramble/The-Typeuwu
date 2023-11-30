@@ -1,4 +1,4 @@
-21800107360570212
+21824126342140010
 Antennas
 7488960245
 
@@ -335,6 +335,13 @@ battery CR-3032 coin cell vertical
 0
 2
 2
+Board Structures
+KFS2-M3 Solder Thr Insert
+
+
+0
+1
+1
 Board Structures
 PCB_Outline_ESP32_Breakout
 
@@ -49658,6 +49665,13 @@ Pin Header 1.27mm 8
 8
 8
 Connector_custom
+PinHeader_1x02_P2.54mm_Horizontal_SMD
+
+
+0
+3
+2
+Connector_custom
 SM02B-SRSS-TB(LF)(SN)
 
 
@@ -49699,6 +49713,13 @@ Screw Terminal sideways 5,08mm 4P
 0
 4
 4
+Connector_custom
+Tag connect mount
+
+
+0
+9
+6
 Connector_custom
 USAKRO_UK-USB
 
@@ -54796,6 +54817,13 @@ MMBT3904 NPN SOT-23
 3
 3
 ICs
+NPN 11V 50mA
+
+
+0
+3
+3
+ICs
 SN74LVC2G17DCKR
 
 
@@ -59813,6 +59841,13 @@ Shielded High Current Inductor, body 41x36mm, https://www.we-online.com/catalog/
 THT
 0
 4
+2
+Inductor_custom
+EATON_EXL1V0402_4.6mmx4.6mm
+
+
+0
+2
 2
 Inductor_custom
 IHLP2020CZER100M01 2.5A 10uH
@@ -65039,6 +65074,20 @@ https://docs.arduino.cc/hardware/nano-33-iot
 PCM_arduino-library
 Arduino_Nano_33_IoT_Tile
 https://docs.arduino.cc/hardware/nano-33-iot
+
+0
+30
+30
+PCM_arduino-library
+Arduino_Nano_ESP32_Socket
+https://docs.arduino.cc/hardware/nano-esp32
+
+0
+30
+30
+PCM_arduino-library
+Arduino_Nano_ESP32_Tile
+https://docs.arduino.cc/hardware/nano-esp32
 
 0
 30
@@ -83685,6 +83734,20 @@ ESP32-WROOM-32D 4MB (high t, pcb antenna)
 38
 38
 SamacSys
+155124RS73200
+155124RS73200-1
+LED
+0
+3
+3
+SamacSys
+23370191
+2337019-1-2
+Connector
+0
+3
+3
+SamacSys
 BH18650PC
 BH-18650-PC-1
 Battery
@@ -83720,6 +83783,13 @@ Inductor
 2
 2
 SamacSys
+INDPM7166X300N
+7.1x6.6x3mm_21
+Inductor
+0
+2
+2
+SamacSys
 NE555DR
 D (R-PDSO-G8)
 Integrated Circuit
@@ -83742,7 +83812,7 @@ Switch
 2
 SamacSys
 QFN50P300X300X100-17N-D
-RGT0016C height 1
+BQ24075RGTR
 Integrated Circuit
 0
 17
@@ -83763,7 +83833,7 @@ Switch
 5
 SamacSys
 SOIC127P600X175-8N
-8-Pin SOIC 150-mil (Package Code SN)
+R-8 (SOIC)
 Integrated Circuit
 0
 8
@@ -83782,6 +83852,13 @@ Inductor
 0
 8
 8
+SamacSys
+SON50P300X200X60-9N
+USON 2x3x0.6-mm
+Integrated Circuit
+0
+9
+9
 SamacSys
 SOP65P640X120-8N
 FS8205A
@@ -83831,6 +83908,20 @@ Integrated Circuit
 0
 4
 4
+SamacSys
+TBAT54CLM
+SOT23
+MOSFET (N-Channel)
+0
+3
+3
+SamacSys
+TPS630701RNMR
+RNM0015A
+Integrated Circuit
+0
+17
+15
 Sensor
 Aosong_DHT11_5.5x12.0_P2.54mm
 Temperature and humidity module, http://akizukidenshi.com/download/ds/aosong/DHT11.pdf
@@ -84433,6 +84524,13 @@ Multi Hotswap with RGB
 0
 8
 6
+Switch footprints
+SLW-864547-5A-RA-D
+
+
+0
+5
+4
 Symbol
 CE-Logo_8.5x6mm_SilkScreen
 CE marking

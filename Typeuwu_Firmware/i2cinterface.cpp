@@ -3,6 +3,18 @@
 bool sda_set = 0;
 bool scl_set = 0;
 
+i2cInterface::i2cInterface(uint8_t *_registered_addresses, uint8_t _size){
+  if(_registered_addresses != NULL){
+    this->registered_addresses = _registered_addresses;
+    this->size_registered_addresses = _size;
+  }
+  else{
+    this->registered_addresses = new uint8_t[1];
+    registered_addresses[0] = 0x19;   // "Random" address to prevent 0x00 (global) call
+    this->size_registered_addresses = 1;
+  }
+}
+
 void i2cInterface::init(){
   sda_set = Wire.setSDA(PIN_SDA);
   scl_set = Wire.setSCL(PIN_SCL);
@@ -15,17 +27,21 @@ void i2cInterface::init(){
 void i2cInterface::probe(){
   uint8_t error;
   address_valid.clear();
-  for(uint8_t i = 0x10; i < 0x80; i++){
-    Wire.beginTransmission(i);
+  for(uint8_t i = 0; i < size_registered_addresses; i++){
+    Wire.beginTransmission(registered_addresses[i]);
     error = Wire.endTransmission();
     if(error == 0){
-      address_valid.push_back(i);
-      Serial.print("Found Address: ");Serial.println(i);
+      address_valid.push_back(registered_addresses[i]);
+      #ifdef SERIAL_DEBUG
+      Serial.print("Found Address: ");Serial.println(registered_addresses[i]);
+      #endif
     }
-    if(i == 0x20){
+    if(registered_addresses[i] == 0x20){
+      #ifdef SERIAL_DEBUG
       Serial.print("error: ");Serial.println(error);
       Serial.print("SDA set: ");Serial.println(sda_set);
       Serial.print("SCL set: ");Serial.println(scl_set);
+      #endif
     }
   }
 
@@ -96,6 +112,48 @@ uint8_t * i2cInterface::getStates(uint8_t address){
   return button_states;
 }
 
+void i2cInterface::set_led_override(uint8_t address, uint16_t key, uint32_t color){
+  bool addressIsValid = 0;
+  for(uint8_t i = 0; i < address_valid.size(); i++){
+    if(address == address_valid.at(i)){
+      addressIsValid = 1;
+    }
+  }
+  if(!addressIsValid){
+    //Serial.println("address not found valid!");
+    return;
+  }
+
+  Wire.beginTransmission(address);
+  Wire.write(SET_LED_OVERRIDE);
+  Wire.write((uint8_t)(key>>8));
+  Wire.write((uint8_t)(key>>0));
+  Wire.write((uint8_t)(color>>24));
+  Wire.write((uint8_t)(color>>16));
+  Wire.write((uint8_t)(color>>8));
+  Wire.write((uint8_t)(color>>0));
+  Wire.endTransmission();
+}
+void i2cInterface::send_led_override_update(uint8_t address, uint16_t key, bool state){
+  bool addressIsValid = 0;
+  for(uint8_t i = 0; i < address_valid.size(); i++){
+    if(address == address_valid.at(i)){
+      addressIsValid = 1;
+    }
+  }
+  if(!addressIsValid){
+    //Serial.println("address not found valid!");
+    return;
+  }
+
+  Wire.beginTransmission(address);
+  Wire.write(SET_LED_OVERRIDE);
+  Wire.write((uint8_t)(key>>8));
+  Wire.write((uint8_t)(key>>0));
+  Wire.write((uint8_t)(state));
+  Wire.endTransmission();
+}
+
 bool i2cInterface::isAddressValid(uint8_t address){
   bool addressIsValid = 0;
   for(uint8_t i = 0; i < address_valid.size(); i++){
@@ -104,4 +162,12 @@ bool i2cInterface::isAddressValid(uint8_t address){
     }
   }
   return addressIsValid;
+}
+
+uint8_t i2cInterface::disableESP(uint8_t address){
+  Wire.beginTransmission(address);
+  Wire.write(15);
+  Wire.write(1);
+  uint8_t error = Wire.endTransmission();
+  return error;
 }
