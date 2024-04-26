@@ -1,0 +1,8 @@
+*.docx
+*.aux
+*.log
+*.out
+*.gz
+*.toc
+*.kicad_prl
+*.zip

@@ -1,0 +1,133 @@
+(kicad_sch
+	(version 20231120)
+	(generator "eeschema")
+	(generator_version "8.0")
+	(uuid "52643837-73aa-4540-931b-80c687ffdc6b")
+	(paper "A4")
+	(title_block
+		(title "The Typeuwu")
+		(date "2025-01-14")
+		(rev "1.0")
+		(company "FG Labs")
+	)
+	(lib_symbols)
+	(sheet
+		(at 247.65 64.77)
+		(size 33.02 69.215)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "0aa63472-f059-4ab0-b3c3-76637e5152c3")
+		(property "Sheetname" "Connectors"
+			(at 247.65 64.0584 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "connectors.kicad_sch"
+			(at 247.65 134.5696 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "The Typeuwu"
+				(path "/52643837-73aa-4540-931b-80c687ffdc6b"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 23.495 101.6)
+		(size 219.075 32.385)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "4057bb27-1b6b-4419-8da0-2df938d15db5")
+		(property "Sheetname" "Keys"
+			(at 23.495 100.8884 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "keys.kicad_sch"
+			(at 23.495 134.5696 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "The Typeuwu"
+				(path "/52643837-73aa-4540-931b-80c687ffdc6b"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 23.495 64.77)
+		(size 219.075 31.115)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "91314e46-7e27-4bf0-955a-19a97d9de495")
+		(property "Sheetname" "Controller"
+			(at 23.495 64.0584 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "controller.kicad_sch"
+			(at 23.495 96.4696 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "The Typeuwu"
+				(path "/52643837-73aa-4540-931b-80c687ffdc6b"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+)
